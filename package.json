@@ -1,0 +1,18 @@
+{
+  "name": "fastify-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.ts",
+  "scripts": {
+    "start": "ts-node server.ts"
+  },
+  "dependencies": {
+    "@types/node": "*",    
+    "fastify": "^3.20.2",
+    "form-data": "^4.0.0",
+    "langchain": "^0.0.87",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.4.3",
+    "zod": "^3.21.4"
+  }
+}
