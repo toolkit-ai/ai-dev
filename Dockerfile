@@ -4,13 +4,13 @@ FROM node:18.16
 WORKDIR /app
 
 COPY package*.json ./
+COPY .env ./
+
 
 RUN npm install
-RUN npm install -g form-data
 
 COPY . .
 
-EXPOSE 3000
+EXPOSE 8080
 
 CMD [ "npm", "run", "start" ]
-

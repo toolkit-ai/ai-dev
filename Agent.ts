@@ -1,39 +1,58 @@
 
 import { OpenAI } from "langchain/llms/openai";
-import { DynamicTool } from "langchain/tools";
+
 import { initializeAgentExecutorWithOptions } from "langchain/agents";
 
 import DirectoryReadTool from "./tools/DirectoryReadTool";
 import FileReadTool from "./tools/FileReadTool";
 import SearchTool from "./tools/SearchTool";
 
+import dotenv from 'dotenv';
+dotenv.config();
 
 export const run = async ({
-    path
+    path,
+    taskDescription
 }:{
     path: string
+    taskDescription: string
 }) => {
-  const model = new OpenAI({ });
-  const tools:DynamicTool[] = [
-    // new FileReadTool(),
-    // new DirectoryReadTool(),
-    // new SearchTool(),    
+    try{
+    
+    
+  const model = new OpenAI({ 
+    modelName: 'gpt-4',
+    openAIApiKey: process.env.OPENAI_API_KEY
+  });
+
+  const tools = [
+    new FileReadTool(),
+    new DirectoryReadTool(),
+    new SearchTool(),    
   ];
 
   const executor = await initializeAgentExecutorWithOptions(tools, model, {
-    agentType: "zero-shot-react-description",
+    agentType: "structured-chat-zero-shot-react-description",
+    returnIntermediateSteps: true,
+    verbose: true,
+    
   });
 
 
   console.log("Loaded agent.");
 
-  const input = `You're a coding assistant. I want to know What files are react components, given the starting directory we're in which is ${path}`;
+  console.log(`Executing agent on task "${taskDescription}"...`);
 
-  console.log(`Executing with input "${input}"...`);
-
-  const result = await executor.call({ input });
-
-  console.log(`Got output ${result.output}`);
+  const result = await executor.call({ 
+    input: `You're a coding assistant. The codebase you're working with is located in the ${path} directory so do your work in the context of to that path. I need your help with: ` + taskDescription
+    
+  });
+  return result;
+  
+} catch (error) {
+    console.error(`Error running agent`, error);
+    throw error;
+  }
 };
 
 

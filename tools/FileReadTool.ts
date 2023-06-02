@@ -29,6 +29,7 @@ class FileReadTool extends StructuredTool<typeof FilePathSchema> {
       return data.toString();
     } catch (error) {
       console.error(`Error reading file at ${path}`, error);
+      return "Error reading file at ${path}"
       throw error;
     }
   }
