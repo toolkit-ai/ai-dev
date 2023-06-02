@@ -8,6 +8,12 @@ import FileReadTool from "./tools/FileReadTool";
 import SearchTool from "./tools/SearchTool";
 
 import dotenv from 'dotenv';
+import FileCreationTool from "./tools/FileCreationTool";
+import FileDeleteLinesTool from "./tools/FileDeleteLinesTool";
+import FileInsertTextTool from "./tools/FileInsertTextTool";
+import GitCreatePRTool from "./tools/GitCreatePRTool";
+import FileReplaceLinesTool from "./tools/FileReplaceLinesTool";
+import FileDeletionTool from "./tools/FileDeletionTool";
 dotenv.config();
 
 export const run = async ({
@@ -19,7 +25,6 @@ export const run = async ({
 }) => {
     try{
     
-    
   const model = new OpenAI({ 
     modelName: 'gpt-4',
     openAIApiKey: process.env.OPENAI_API_KEY
@@ -28,7 +33,13 @@ export const run = async ({
   const tools = [
     new FileReadTool(),
     new DirectoryReadTool(),
-    new SearchTool(),    
+    new SearchTool(),
+    new FileCreationTool(),
+    new FileDeleteLinesTool(),
+    new FileInsertTextTool(),
+    new GitCreatePRTool(),
+    new FileReplaceLinesTool(),
+    new FileDeletionTool()
   ];
 
   const executor = await initializeAgentExecutorWithOptions(tools, model, {
