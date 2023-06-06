@@ -1,6 +1,7 @@
-import { StructuredTool, ToolParams } from 'langchain/tools';
-import { z } from 'zod';
 import { promises as fs } from 'fs';
+
+import { StructuredTool } from 'langchain/tools';
+import { z } from 'zod';
 
 // Define the Zod schema for the input
 const FileInsertTextSchema = z.object({
@@ -13,24 +14,22 @@ type FileInsertTextType = z.infer<typeof FileInsertTextSchema>;
 
 // Define the tool
 class FileInsertTextTool extends StructuredTool<typeof FileInsertTextSchema> {
-  constructor(fields?: ToolParams) {
-    super(fields);
-  }
-
   // Implement the required properties
   name = 'FileInsertTextTool';
+
   description = 'A tool that inserts text at a specific line in a file';
+
   schema = FileInsertTextSchema;
 
   // Implement the protected abstract method
   protected async _call(arg: FileInsertTextType): Promise<string> {
-    const path = arg.path;
-    const lineNumber = arg.lineNumber;
-    const text = arg.text;
+    const { path } = arg;
+    const { lineNumber } = arg;
+    const { text } = arg;
 
     try {
       const data = await fs.readFile(path, 'utf-8');
-      let lines = data.split('\n');
+      const lines = data.split('\n');
 
       if (lineNumber < 1 || lineNumber > lines.length + 1) {
         throw new Error('Line number is out of range');
