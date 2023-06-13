@@ -78,7 +78,7 @@ server.post('/task', async (request) => {
   }
 });
 
-server.listen(8080, '0.0.0.0', (err) => {
+server.listen({ port: 8080, host: '0.0.0.0' }, (err) => {
   if (err) {
     server.log.error(err);
     process.exit(1);
