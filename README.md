@@ -24,7 +24,8 @@ POST http://127.0.0.1:8080/task
   "githubToken": "{{YOUR GITHUB TOKEN}}
   "githubRepoOwner": "hey-pal",
   "githubRepoName": "pal-web",
-  "githubBranch": "main",
+  "githubBranchToStartFrom": "main", // The branch to initially fork from, defaults to main.
+  "githubPRBranch": "your-pr-branch", // If no name is provided, the agent-will name the branch.
   "userName": "nicolaerusan",
   "userEmail": "nicolaerusan@gmail.com"
 }

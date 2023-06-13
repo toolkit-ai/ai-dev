@@ -10,6 +10,7 @@
     "start": "tsx ./src/server.ts"
   },
   "dependencies": {
+    "@octokit/rest": "^19.0.11",
     "@tsconfig/esm": "^1.0.3",
     "@tsconfig/node18": "^2.0.1",
     "@tsconfig/strictest": "^2.0.1",

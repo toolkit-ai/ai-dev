@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+import { config } from 'dotenv';
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { OpenAI } from 'langchain/llms/openai';
 
@@ -9,10 +9,9 @@ import FileDeletionTool from './tools/FileDeletionTool';
 import FileInsertTextTool from './tools/FileInsertTextTool';
 import FileReadTool from './tools/FileReadTool';
 import FileReplaceLinesTool from './tools/FileReplaceLinesTool';
-import GitCreatePRTool from './tools/GitCreatePRTool';
 import SearchTool from './tools/SearchTool';
 
-dotenv.config();
+config();
 
 export const run = async ({
   path,
@@ -39,7 +38,7 @@ export const run = async ({
       new FileCreationTool(),
       new FileDeleteLinesTool(),
       new FileInsertTextTool(),
-      new GitCreatePRTool(),
+      // new GitCreatePRTool(),
       new FileReplaceLinesTool(),
       new FileDeletionTool(),
     ];
@@ -55,7 +54,7 @@ export const run = async ({
     console.log(`Executing agent on task "${taskDescription}"...`);
 
     const result = await executor.call({
-      input: `You're a coding assistant. The codebase you're working with is located in the ${path} directory so do your work in the context of to that path. I need your help with: ${taskDescription}`,
+      input: `You're a coding assistant. The codebase you're working with is located in the ${path} directory so do your work in the context of to that path. I need your help with: ${taskDescription}. When you're finished return the following data in this format type result = { filesChagned: string[], commitMessage: string }`,
     });
     return result;
   } catch (error) {

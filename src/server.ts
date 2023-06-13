@@ -4,7 +4,7 @@ import path from 'path';
 
 import dotenv from 'dotenv';
 import fastify from 'fastify';
-import FileReadTool from 'tools/FileReadTool';
+import { createPR } from 'gitPRCreation';
 
 import { run } from './Agent';
 
@@ -23,7 +23,8 @@ server.post('/task', async (request) => {
     githubUserEmail,
     githubRepoOwner,
     githubRepoName,
-    githubBranch,
+    githubBranchToStartFrom,
+    githubPRBranch,
     taskDescription,
   } = request.body as {
     githubToken: string;
@@ -33,7 +34,8 @@ server.post('/task', async (request) => {
     taskDescription: string;
     githubRepoOwner: string;
     githubRepoName: string;
-    githubBranch: string;
+    githubBranchToStartFrom: string;
+    githubPRBranch: string;
   };
 
   console.log('starting');
@@ -45,7 +47,13 @@ server.post('/task', async (request) => {
   // Call the git_operations.sh script with the required arguments
   const gitOperationsScript = path.resolve(__dirname, 'git_operations.sh');
   execSync(
-    `bash ${gitOperationsScript} ${githubToken} ${githubUsername} ${githubUserEmail} ${githubRepoOwner} ${githubRepoName} ${githubBranch} ${tempDir}`
+    `bash ${gitOperationsScript} ${githubToken} ${githubUsername} ${githubUserEmail} ${githubRepoOwner} ${githubRepoName} ${githubBranchToStartFrom} ${githubPRBranch} ${tempDir}`
+  );
+
+  // console.log the branch that is active in the current directory
+  console.log(
+    'Current branch:',
+    execSync('git branch --show-current').toString()
   );
 
   // Get the list of files in the cloned repository
@@ -63,15 +71,19 @@ server.post('/task', async (request) => {
     // Navigate to the tempDir that was created
     process.chdir(tempDir);
 
-    const fileReadTool = new FileReadTool();
-    const content = await fileReadTool.call({ path: filePath });
-    // console.log({ content })
     const result = await run({
       path: tempDir,
       taskDescription,
+      githubPRBranch,
     });
 
-    return { status: 'success', result, files, content };
+    /// If agent successfully ran, commit the files and create a pull request
+    const pr = await createPR({
+      githubToken,
+      githubPrBranch: githubPRBranch,
+    });
+
+    return { status: 'success', result, pr };
   } catch (err) {
     console.error(err);
     return { status: 'failure' };
