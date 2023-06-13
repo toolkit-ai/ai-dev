@@ -38,8 +38,8 @@ server.post('/task', async (request) => {
     githubPRBranch: string;
   };
 
-  console.log('starting');
-  console.log('received request', request.body);
+  console.log('Starting');
+  console.log('Received request', request.body);
 
   // Create a unique temp directory for each request
   const tempDir = fs.mkdtempSync('/tmp/repo-');
@@ -74,13 +74,12 @@ server.post('/task', async (request) => {
     const result = await run({
       path: tempDir,
       taskDescription,
-      githubPRBranch,
     });
 
     /// If agent successfully ran, commit the files and create a pull request
     const pr = await createPR({
       githubToken,
-      githubPrBranch: githubPRBranch,
+      githubPRBranch,
     });
 
     return { status: 'success', result, pr };
