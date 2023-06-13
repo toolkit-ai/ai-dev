@@ -38,7 +38,6 @@ export const run = async ({
       new FileCreationTool(),
       new FileDeleteLinesTool(),
       new FileInsertTextTool(),
-      // new GitCreatePRTool(),
       new FileReplaceLinesTool(),
       new FileDeletionTool(),
     ];
