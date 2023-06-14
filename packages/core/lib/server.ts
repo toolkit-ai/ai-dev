@@ -2,15 +2,12 @@ import { execSync } from 'child_process';
 import fs, { readdirSync } from 'fs';
 import path from 'path';
 
-import dotenv from 'dotenv';
 import fastify from 'fastify';
-import { createPR } from 'gitPRCreation';
+import { createPR } from './gitPRCreation';
 
 import { run } from './Agent';
 
-dotenv.config();
-
-const server = fastify({
+export const server = fastify({
   // logger: {
   //   level:
   // },
@@ -18,6 +15,7 @@ const server = fastify({
 
 server.post('/task', async (request) => {
   const {
+    openAIApiKey,
     githubToken,
     githubUsername,
     githubUserEmail,
@@ -27,6 +25,8 @@ server.post('/task', async (request) => {
     githubPRBranch,
     taskDescription,
   } = request.body as {
+    openAIApiKey: string;
+
     githubToken: string;
     githubUsername: string;
     githubUserEmail: string;
@@ -74,6 +74,7 @@ server.post('/task', async (request) => {
     const result = await run({
       path: tempDir,
       taskDescription,
+      openAIApiKey,
     });
 
     /// If agent successfully ran, commit the files and create a pull request
@@ -86,12 +87,5 @@ server.post('/task', async (request) => {
   } catch (err) {
     console.error(err);
     return { status: 'failure' };
-  }
-});
-
-server.listen({ port: 8080, host: '0.0.0.0' }, (err) => {
-  if (err) {
-    server.log.error(err);
-    process.exit(1);
   }
 });

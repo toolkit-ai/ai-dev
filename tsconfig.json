@@ -6,11 +6,9 @@
   ],
   "compilerOptions": {
     "strict": true,
-    "baseUrl": "src",
-    "outDir": "dist",
+    "module": "NodeNext",
     "declaration": true,
     "declarationMap": true,
     "ignoreDeprecations": "5.0"
-  },
-  "exclude": ["dist"]
+  }
 }
