@@ -1,4 +1,3 @@
-import { config } from 'dotenv';
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { OpenAI } from 'langchain/llms/openai';
 
@@ -11,24 +10,19 @@ import FileReadTool from './tools/FileReadTool';
 import FileReplaceLinesTool from './tools/FileReplaceLinesTool';
 import SearchTool from './tools/SearchTool';
 
-config();
-
 export const run = async ({
   path,
   taskDescription,
+  openAIApiKey,
 }: {
   path: string;
   taskDescription: string;
+  openAIApiKey: string;
 }) => {
   try {
-    const openaiApiKey = process.env['OPENAI_API_KEY'];
-    if (!openaiApiKey) {
-      throw new Error('environment variable OPENAI_API_KEY not set');
-    }
-
     const model = new OpenAI({
       modelName: 'gpt-4',
-      openAIApiKey: openaiApiKey,
+      openAIApiKey,
     });
 
     const tools = [
@@ -61,7 +55,3 @@ export const run = async ({
     throw error;
   }
 };
-
-class Agent {}
-
-export default Agent;
