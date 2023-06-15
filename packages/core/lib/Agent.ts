@@ -1,16 +1,9 @@
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { OpenAI } from 'langchain/llms/openai';
-
-import DirectoryReadTool from './tools/DirectoryReadTool';
-import FileCreationTool from './tools/FileCreationTool';
-import FileDeleteLinesTool from './tools/FileDeleteLinesTool';
-import FileDeletionTool from './tools/FileDeletionTool';
-import FileInsertTextTool from './tools/FileInsertTextTool';
-import FileReadTool from './tools/FileReadTool';
-import FileReplaceLinesTool from './tools/FileReplaceLinesTool';
-import SearchTool from './tools/SearchTool';
+import type { StructuredTool } from 'langchain/tools';
 
 export const run = async ({
+  tools,
   path,
   taskDescription,
   openAIApiKey,
@@ -18,23 +11,13 @@ export const run = async ({
   path: string;
   taskDescription: string;
   openAIApiKey: string;
+  tools: StructuredTool[];
 }) => {
   try {
     const model = new OpenAI({
       modelName: 'gpt-4',
       openAIApiKey,
     });
-
-    const tools = [
-      new FileReadTool(),
-      new DirectoryReadTool(),
-      new SearchTool(),
-      new FileCreationTool(),
-      new FileDeleteLinesTool(),
-      new FileInsertTextTool(),
-      new FileReplaceLinesTool(),
-      new FileDeletionTool(),
-    ];
 
     const executor = await initializeAgentExecutorWithOptions(tools, model, {
       agentType: 'structured-chat-zero-shot-react-description',
