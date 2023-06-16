@@ -1,5 +1,7 @@
+#!/usr/bin/env node
+
 import {
-  createServer,
+  createAgentServer,
   FileReadTool,
   DirectoryReadTool,
   SearchTool,
@@ -9,8 +11,9 @@ import {
   FileReplaceLinesTool,
   FileDeletionTool,
 } from '@magnet-agent/core';
+import { HOST, PORT } from './config';
 
-const server = createServer({
+const server = createAgentServer({
   tools: [
     new FileReadTool(),
     new DirectoryReadTool(),
@@ -23,8 +26,8 @@ const server = createServer({
   ],
 });
 
-server.listen({ port: 8080, host: '0.0.0.0' }, (err) => {
-  console.log('Server running on port 8080');
+server.listen({ port: PORT, host: HOST }, (err) => {
+  console.log(`Server running on port ${PORT}`);
   if (err) {
     server.log.error(err);
     process.exit(1);

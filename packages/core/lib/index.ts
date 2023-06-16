@@ -7,7 +7,7 @@ import FileReadTool from './tools/FileReadTool';
 import FileReplaceLinesTool from './tools/FileReplaceLinesTool';
 import SearchTool from './tools/SearchTool';
 
-export { createServer } from './server';
+export { createAgentServer } from './createAgentServer';
 
 export {
   DirectoryReadTool,
@@ -19,3 +19,5 @@ export {
   FileReplaceLinesTool,
   SearchTool,
 };
+
+export { Host } from './Host';
