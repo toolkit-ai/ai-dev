@@ -7,6 +7,10 @@ import {
   createImage,
   deleteContainer,
   imageExists,
+  isDockerDesktopInstalled,
+  isDockerDesktopRunning,
+  launchDockerDesktop,
+  waitForDockerDesktop,
   waitForServer,
 } from './container';
 import { Host, formatAsMarkdown } from '@magnet-agent/core';
@@ -56,9 +60,22 @@ async function runAsyncTask() {
     process.exit(1);
   }
 
+  if (!isDockerDesktopInstalled()) {
+    console.error(
+      'Docker Desktop is not installed. Please visit https://www.docker.com/products/docker-desktop to install it.'
+    );
+    process.exit(1);
+  }
+
+  if (!isDockerDesktopRunning()) {
+    logContainer('Docker Desktop is not running, launching it now...');
+    launchDockerDesktop();
+    await waitForDockerDesktop();
+  }
+
   if (!imageExists() || rebuild) {
     logContainer('Creating image...');
-    createImage();
+    createImage(path.join(__dirname, '..', '..'), 'local/Dockerfile');
   }
 
   if (!containerExists() || rebuild) {
