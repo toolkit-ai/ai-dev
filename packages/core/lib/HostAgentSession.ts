@@ -9,6 +9,7 @@ import type {
 import WebSocket from 'ws';
 import type { HostMessage } from './HostMessage';
 import { OpenAI } from 'langchain/llms/openai';
+import type { AgentResult } from './AgentResult';
 
 export class HostAgentSession extends EventEmitter {
   socket: WebSocket;
@@ -39,7 +40,7 @@ export class HostAgentSession extends EventEmitter {
     });
   }
 
-  async getResult(): Promise<any> {
+  async getResult(): Promise<AgentResult> {
     return new Promise((resolve, reject) => {
       this.on('complete', (result) => {
         resolve(result);

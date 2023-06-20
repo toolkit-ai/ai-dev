@@ -9,12 +9,11 @@ import {
   imageExists,
   waitForServer,
 } from './container';
-import { Host } from '@magnet-agent/core';
+import { Host, formatAsMarkdown } from '@magnet-agent/core';
 import { HOST, PORT } from './config';
 import { writeFile } from 'fs/promises';
 import path from 'path';
 import dotenv from 'dotenv';
-import { formatResultsToMarkdown } from './format-agent-output';
 
 dotenv.config();
 
@@ -40,11 +39,11 @@ program.parse(process.argv);
 async function runAsyncTask() {
   const {
     folder,
-    task,
     outfile,
+    outputFormat,
+    task,
     rebuild,
     model: modelName,
-    outputFormat,
   } = program.opts();
 
   const openAIApiKey = process.env['OPENAI_API_KEY'];
@@ -80,15 +79,19 @@ async function runAsyncTask() {
 
   try {
     const result = await session.getResult();
-    
-    /*
-      Should the formatting be done in the script here
-      or should the agent itself has that as a parameter?
-    */
-    const outputData =
-      outputFormat === 'md' ? formatResultsToMarkdown(result) : JSON.stringify(result, null, 2);
 
-    await writeFile(path.resolve(outfile), outputData);
+    switch (outputFormat) {
+      case 'md':
+        await writeFile(path.resolve(outfile), formatAsMarkdown(result));
+        break;
+      case 'json':
+        await writeFile(path.resolve(outfile), JSON.stringify(result, null, 2));
+        break;
+      default:
+        console.error(`Unknown output format: ${outputFormat}`);
+        process.exit(1);
+    }
+
     console.log('Done running task!');
   } catch (e) {
     console.error(`Error running task: ${e}`);

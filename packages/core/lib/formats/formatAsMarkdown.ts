@@ -1,18 +1,6 @@
-interface IntermediateStep {
-  action: {
-    tool: string;
-    toolInput: Record<string, unknown>;
-    log: string;
-  };
-  observation: string;
-}
+import type { AgentResult } from '../AgentResult';
 
-interface AgentResultJsonOutput {
-  output: string;
-  intermediateSteps: IntermediateStep[];
-}
-
-export function formatResultsToMarkdown(result: AgentResultJsonOutput): string {
+export function formatAsMarkdown(result: AgentResult): string {
   const task =
     result.intermediateSteps[0]?.action?.log?.split('\n')[0]?.substring(10) ||
     'Unknown Task';
