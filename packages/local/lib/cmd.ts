@@ -14,6 +14,8 @@ import { HOST, PORT } from './config';
 import { writeFile } from 'fs/promises';
 import path from 'path';
 import dotenv from 'dotenv';
+import chalk from 'chalk';
+import indentString from 'indent-string';
 
 dotenv.config();
 
@@ -55,26 +57,43 @@ async function runAsyncTask() {
   }
 
   if (!imageExists() || rebuild) {
-    console.log('Creating image...');
+    logContainer('Creating image...');
     createImage();
   }
 
   if (!containerExists() || rebuild) {
-    console.log('Creating container...');
-    if (containerExists()) deleteContainer();
+    if (containerExists()) {
+      logContainer('Deleting existing container...');
+      deleteContainer();
+    }
+
+    logContainer('Creating container...');
     createContainer();
   }
 
+  logContainer('Waiting for container...');
   await waitForServer();
+  logContainer(chalk.green('Container ready! ✅'));
 
-  console.log('Running task...');
+  logAgent('Running task...');
 
   const host = new Host(HOST, PORT, modelName, openAIApiKey);
   await host.uploadDirectory(folder, folder);
 
   const session = host.createAgent(folder, task);
   session.on('action', (action) => {
-    console.log(`Action: ${JSON.stringify(action)}`);
+    logAgent(
+      chalk.blue.bold('Performed action...\n\n') +
+        indentString(
+          `${chalk.bold.underline('Tool')}: ${action.tool}\n\n` +
+            `${chalk.bold.underline('Tool Input')}:\n${indentString(
+              JSON.stringify(action.toolInput, null, 2),
+              2
+            )}\n\n` +
+            `${chalk.bold.underline('Log')}:\n${indentString(action.log)}`,
+          2
+        )
+    );
   });
 
   try {
@@ -92,10 +111,20 @@ async function runAsyncTask() {
         process.exit(1);
     }
 
-    console.log('Done running task!');
+    logAgent(
+      chalk.green.bold('Complete! Output written to: ') + `${outfile} ✅`
+    );
   } catch (e) {
-    console.error(`Error running task: ${e}`);
+    logAgent(chalk.red.bold('Error!') + '\n\n' + indentString(e as any, 2));
   }
+}
+
+function logContainer(message: string) {
+  console.log(chalk.inverse.bold('Container') + ' ' + message);
+}
+
+function logAgent(message: string) {
+  console.log(chalk.blue.inverse.bold('Agent') + ' ' + message);
 }
 
 runAsyncTask();
