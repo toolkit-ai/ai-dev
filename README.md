@@ -1,31 +1,61 @@
 # Magnet Agent
 
-Magent Agent is a tool-enabled coding assistant that can spin up a docker sandbox for an AI agent to clone a Github repo in, pull or create a branch, and then use a set of tools to try to accomplish a task you've specified.
+Magent Agent is a tool-enabled coding assistant that can perform open-ended tasks on your codebase:
 
-To configure the docker coding agent, you'll need to set the following in a .env file:
+- **Isolated**. It spins up a Docker sandbox for coding tasks so it's isolated from your local environment.
+- **Portable**. We're making container APIs for local and cloud environments.
+- **Extensible**. You can add your own tasks by writing plugins with LangChain.
+## Install
 
-```
-#.env
-OPENAI_API_KEY= {{YOUR_OPENAI_API_KEY}}
+**The easiest way to try Magnet Agent is to download [Magnet](https://magnet.run), our desktop app that comes with Magnet Agent pre-installed.**
+
+However, you can try Magnet Agent without Magnet with our CLI:
+
+```bash
+npm install @magnet-agent/local
 ```
 
-Start the agent by calling:
-```
-./start-agent-docker.sh
+You'll need to have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running on your machine.
+
+## Usage
+
+You can run Magnet Agent with our CLI by calling:
+
+```bash
+OPENAI_API_KEY=your_openai_api_key_here npx magnet-agent -f ./ -t "Your task here." -o ./output
 ```
 
-The Docker agent exposes an API that you can call by executing:
-```
-POST http://127.0.0.1:8080/task
+- `-f` is the path to the folder you want to run the task on.
+- `-t` is the task description.
+- `-o` is the path to the file where the agent will output the results.
 
-// Parameters:
-{
-  "taskDescription": "I'm working on a implementing a feature 'add a clear conversation in widget', What might be the files that I should open to start my work on this feature",
-  "githubToken": "{{YOUR GITHUB TOKEN}}
-  "githubRepoOwner": "hey-pal",
-  "githubRepoName": "pal-web",
-  "githubBranchToStartFrom": "main", // The branch to initially fork from, defaults to main.
-  "githubPRBranch": "your-pr-branch", // If no name is provided, the agent-will name the branch.
-  "userName": "nicolaerusan",
-  "userEmail": "nicolaerusan@gmail.com"
-}
+There's APIs for local and cloud environments that you can use to run the agent programmatically.
+
+## Packages
+
+This repository is a monorepo that we manage using Lerna. That means that we actually publish several packages to npm from the same codebase, including:
+
+| Package | Description 
+| --- | ---
+| [`@magnet-agent/core`](./packages/core/README.md) | Core logic for running tasks.
+| [`@magnet-agent/local`](./packages/local/README.md) | Local container API and CLI.
+| `@magnet-agent/cloud-aws` | AWS container API (coming soon).
+
+See readmes in the respective packages for more info.
+
+## Development
+
+This is a monorepo managed with Lerna. To get started, run:
+
+```bash
+pnpm install -g lerna
+pnpm install
+cd packages/core; pnpm install; cd ../..
+cd packages/local; pnpm install; cd ../..
+```
+
+Then, you can build all of the packages using `lerna run build`.
+
+## License
+
+[Apache 2.0](./LICENSE)
