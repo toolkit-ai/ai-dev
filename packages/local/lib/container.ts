@@ -1,9 +1,40 @@
 import { execSync } from 'child_process';
-import path from 'path';
 import { PORT } from './config';
 
 const IMAGE_NAME = 'magnet-agent';
 const CONTAINER_NAME = 'magnet-agent';
+
+export function isDockerDesktopInstalled() {
+  try {
+    execSync(`docker --version`);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+export function isDockerDesktopRunning() {
+  try {
+    execSync(`docker info`);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+export async function launchDockerDesktop() {
+  try {
+    execSync('docker info');
+  } catch (e) {
+    execSync('open -a Docker');
+  }
+}
+
+export async function waitForDockerDesktop() {
+  while (!isDockerDesktopRunning()) {
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+  }
+}
 
 export function imageExists() {
   try {
@@ -14,13 +45,9 @@ export function imageExists() {
   }
 }
 
-export function createImage() {
+export function createImage(contextPath: string, dockerfilePath: string) {
   return execSync(
-    `cd ${path.join(
-      __dirname,
-      '..',
-      '..'
-    )}; docker build -t ${IMAGE_NAME} -f local/Dockerfile .`
+    `cd ${contextPath}; docker build -t ${IMAGE_NAME} -f ${dockerfilePath} .`
   );
 }
 
