@@ -9,6 +9,8 @@ import SearchTool from './tools/SearchTool';
 
 export { createAgentServer } from './createAgentServer';
 
+export { formatAsMarkdown } from './formats/formatAsMarkdown';
+
 export {
   DirectoryReadTool,
   FileCreationTool,

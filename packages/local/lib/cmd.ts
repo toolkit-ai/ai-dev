@@ -9,7 +9,7 @@ import {
   imageExists,
   waitForServer,
 } from './container';
-import { Host } from '@magnet-agent/core';
+import { Host, formatAsMarkdown } from '@magnet-agent/core';
 import { HOST, PORT } from './config';
 import { writeFile } from 'fs/promises';
 import path from 'path';
@@ -23,6 +23,11 @@ program
   .requiredOption('-t, --task <task>', 'Specify the task')
   .requiredOption('-o, --outfile <outfile>', 'Specify the outfile')
   .option(
+    '-of, --outputFormat <format>',
+    'Specify the output format json or md',
+    'md'
+  )
+  .option(
     '-m, --model <model>',
     'Specify the OpenAI model to use',
     'gpt-3.5-turbo'
@@ -32,7 +37,14 @@ program
 program.parse(process.argv);
 
 async function runAsyncTask() {
-  const { folder, task, outfile, rebuild, model: modelName } = program.opts();
+  const {
+    folder,
+    outfile,
+    outputFormat,
+    task,
+    rebuild,
+    model: modelName,
+  } = program.opts();
 
   const openAIApiKey = process.env['OPENAI_API_KEY'];
   if (!openAIApiKey) {
@@ -67,7 +79,19 @@ async function runAsyncTask() {
 
   try {
     const result = await session.getResult();
-    await writeFile(path.resolve(outfile), JSON.stringify(result));
+
+    switch (outputFormat) {
+      case 'md':
+        await writeFile(path.resolve(outfile), formatAsMarkdown(result));
+        break;
+      case 'json':
+        await writeFile(path.resolve(outfile), JSON.stringify(result, null, 2));
+        break;
+      default:
+        console.error(`Unknown output format: ${outputFormat}`);
+        process.exit(1);
+    }
+
     console.log('Done running task!');
   } catch (e) {
     console.error(`Error running task: ${e}`);
