@@ -94,10 +94,10 @@ async function runAsyncTask() {
 
   logAgent('Running task...');
 
-  const host = new Host(HOST, PORT, modelName, openAIApiKey);
+  const host = new Host(HOST, PORT);
   await host.uploadDirectory(folder, folder);
 
-  const session = host.createAgent(folder, task);
+  const session = host.createAgent(folder, task, modelName, openAIApiKey);
   session.on('action', (action) => {
     logAgent(
       chalk.blue.bold('Performed action...\n\n') +
