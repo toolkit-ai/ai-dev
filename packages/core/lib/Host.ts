@@ -6,19 +6,10 @@ import { HostAgentSession } from './HostAgentSession';
 export class Host {
   hostname: string;
   port: number;
-  modelName: string;
-  openAIApiKey: string;
 
-  constructor(
-    hostname: string,
-    port: number,
-    modelName: string,
-    openAIApiKey: string
-  ) {
+  constructor(hostname: string, port: number) {
     this.hostname = hostname;
     this.port = port;
-    this.modelName = modelName;
-    this.openAIApiKey = openAIApiKey;
   }
 
   async uploadDirectory(repoName: string, directoryPath: string) {
@@ -33,13 +24,18 @@ export class Host {
     });
   }
 
-  createAgent(repoName: string, taskDescription: string): HostAgentSession {
+  createAgent(
+    repoName: string,
+    taskDescription: string,
+    modelName: string,
+    openAIApiKey: string
+  ): HostAgentSession {
     return new HostAgentSession(
       `ws://${this.hostname}:${this.port}/agent`,
       repoName,
       taskDescription,
-      this.modelName,
-      this.openAIApiKey
+      modelName,
+      openAIApiKey
     );
   }
 }
