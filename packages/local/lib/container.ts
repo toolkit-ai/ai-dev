@@ -21,7 +21,7 @@ export function createImage() {
       '..',
       '..'
     )}; docker build -t ${IMAGE_NAME} -f local/Dockerfile .`
-  ).toString();
+  );
 }
 
 export function containerExists() {
