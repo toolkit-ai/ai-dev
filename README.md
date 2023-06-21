@@ -50,11 +50,20 @@ This is a monorepo managed with Lerna. To get started, run:
 ```bash
 pnpm install -g lerna
 pnpm install
-cd packages/core; pnpm install; cd ../..
-cd packages/local; pnpm install; cd ../..
 ```
 
 Then, you can build all of the packages using `lerna run build`.
+
+Or, you can build a specific package using `lerna run build --scope @magnet-agent/package-name`.
+
+Once you've built the packages, you can run the CLI by calling:
+
+```bash
+cd packages/local
+OPENAI_API_KEY=your_openai_api_key_here  npx magnet-agent -f ./ --task "Browse and understand the codebase / packaging here, and then based on what you learn, edit the README.md to show how to use npx magnet-agent, documenting all of the different parameters in defined in cmd.ts" -o ./test.md -r -of md -m gpt-4
+```
+
+You can also add a `.env` file `packages/local` with your `OPENAI_API_KEY` if you don't want to pass it in as an environment variable.
 
 ## License
 
