@@ -10,7 +10,7 @@ import {
   FileInsertTextTool,
   FileReplaceLinesTool,
   FileDeletionTool,
-} from '@magnet-agent/core';
+} from '../../agent/dist';
 import { HOST, PORT } from './config';
 
 const server = createAgentServer({

@@ -1,4 +1,4 @@
-import type { AgentResult } from '../AgentResult';
+import type { AgentResult } from '../../../agent/lib/AgentResult';
 
 export function formatAsMarkdown(result: AgentResult): string {
   const task =

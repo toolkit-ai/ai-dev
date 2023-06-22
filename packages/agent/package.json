@@ -1,27 +1,44 @@
 {
-  "name": "@magnet-agent/local",
+  "name": "@magnet-agent/agent",
   "version": "0.0.0",
-  "description": "Intelligent AI agent that completes coding tasks for you, in a local Docker container.",
+  "description": "Contains the agent and its tools run inside a container.",
   "keywords": [
     "ai",
-    "agent",
     "gpt"
   ],
   "author": "Toolkit AI <team@toolkit.ai>",
-  "homepage": "https://magnet.run",
+  "homepage": "https://www.magnet.run/",
   "license": "Apache-2.0",
-  "main": "dist/index.js",
+  "main": "./dist/index.js",
   "directories": {
     "dist": "dist"
   },
   "files": [
-    "dist",
-    "start-agent-docker.sh",
-    "Dockerfile"
+    "dist"
   ],
+  "scripts": {
+    "format": "prettier --check .",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --project tsconfig.json"
+  },
+  "dependencies": {
+    "@fastify/multipart": "^7.6.1",
+    "@fastify/websocket": "^8.1.0",
+    "@magnet-agent/agent": "link:",
+    "@octokit/rest": "^19.0.11",
+    "decompress": "^4.2.1",
+    "fastify": "^4.18.0",
+    "langchain": "^0.0.92",
+    "uuid": "^9.0.0",
+    "ws": "^8.13.0",
+    "zod": "^3.21.4"
+  },
   "devDependencies": {
-    "@types/dockerode": "^3.3.19",
+    "@types/decompress": "^4.2.4",
     "@types/node": "^20.3.1",
+    "@types/uuid": "^9.0.2",
+    "@types/ws": "^8.5.5",
     "@typescript-eslint/eslint-plugin": "^5.59.11",
     "@typescript-eslint/parser": "^5.59.11",
     "eslint": "^8.42.0",
@@ -37,26 +54,7 @@
     "type": "git",
     "url": "git+https://github.com/hey-pal/magnet-agent.git"
   },
-  "bin": {
-    "magnet-agent": "./dist/cmd.js"
-  },
-  "scripts": {
-    "start": "./start-agent-docker.sh",
-    "start-agent": "node ./dist/server.js",
-    "format": "prettier --check .",
-    "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "build": "tsc --project tsconfig.json"
-  },
   "bugs": {
     "url": "https://github.com/hey-pal/magnet-agent/issues"
-  },
-  "dependencies": {
-    "@magnet-agent/core": "link:../core",
-    "chalk": "^4.1.2",
-    "commander": "^10.0.1",
-    "dockerode": "^3.3.5",
-    "dotenv": "^16.1.4",
-    "indent-string": "^4.0.0"
   }
 }

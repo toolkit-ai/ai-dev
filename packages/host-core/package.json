@@ -1,0 +1,58 @@
+{
+  "name": "@magnet-agent/host-core",
+  "version": "0.0.0",
+  "description": "Contains core implementation of Host for agent in a container.",
+  "keywords": [
+    "ai",
+    "agent",
+    "gpt"
+  ],
+  "author": "Jonathan Wilde <jonathan@realworldprivacy.com>",
+  "homepage": "https://magnet.run",
+  "license": "Apache-2.0",
+  "main": "dist/host-core/lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hey-pal/magnet-agent.git"
+  },
+  "scripts": {
+    "format": "prettier --check .",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --project tsconfig.json"
+  },
+  "bugs": {
+    "url": "https://github.com/hey-pal/magnet-agent/issues"
+  },
+  "devDependencies": {
+    "@magnet-agent/agent": "link:../agent",
+    "@types/archiver": "^5.3.2",
+    "@types/ws": "^8.5.5",
+    "@typescript-eslint/eslint-plugin": "^5.59.11",
+    "@typescript-eslint/parser": "^5.59.11",
+    "eslint": "^8.42.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^17.0.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-import": "^2.27.5",
+    "prettier": "^2.8.8",
+    "tsx": "^3.12.7",
+    "typescript": "^5.1.3"
+  },
+  "dependencies": {
+    "archiver": "^5.3.1",
+    "axios": "^1.4.0",
+    "langchain": "^0.0.92",
+    "form-data": "^4.0.0",
+    "ignore": "^5.2.4",
+    "walkdir": "^0.4.1",
+    "ws": "^8.13.0"
+  }
+}

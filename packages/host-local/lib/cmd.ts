@@ -13,7 +13,7 @@ import {
   waitForDockerDesktop,
   waitForServer,
 } from './container';
-import { Host, formatAsMarkdown } from '@magnet-agent/core';
+import { AgentHost, formatAsMarkdown } from '@magnet-agent/host-core';
 import { HOST, PORT } from './config';
 import { writeFile } from 'fs/promises';
 import path from 'path';
@@ -94,10 +94,10 @@ async function runAsyncTask() {
 
   logAgent('Running task...');
 
-  const host = new Host(HOST, PORT);
+  const host = new AgentHost(HOST, PORT);
   await host.uploadDirectory(folder, folder);
 
-  const session = host.createAgent(folder, task, modelName, openAIApiKey);
+  const session = host.startTask(folder, task, modelName, openAIApiKey);
   session.on('action', (action) => {
     logAgent(
       chalk.blue.bold('Performed action...\n\n') +

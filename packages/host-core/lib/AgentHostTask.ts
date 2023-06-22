@@ -5,13 +5,13 @@ import type {
   AgentErrorMessage,
   AgentMessage,
   AgentRequestMessage,
-} from './AgentMessage';
+  AgentResult,
+} from '@magnet-agent/agent';
 import WebSocket from 'ws';
-import type { HostMessage } from './HostMessage';
+import type { AgentHostMessage } from '@magnet-agent/agent';
 import { OpenAI } from 'langchain/llms/openai';
-import type { AgentResult } from './AgentResult';
 
-export class HostAgentSession extends EventEmitter {
+export class AgentHostTask extends EventEmitter {
   socket: WebSocket;
   model: OpenAI;
 
@@ -92,7 +92,7 @@ export class HostAgentSession extends EventEmitter {
     this.emit('error', message.error);
   }
 
-  private sendMessage(message: HostMessage) {
+  private sendMessage(message: AgentHostMessage) {
     this.socket.send(JSON.stringify(message));
   }
 }

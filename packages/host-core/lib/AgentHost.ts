@@ -1,11 +1,12 @@
 import FormData from 'form-data';
 import axios from 'axios';
 import { createDirectorySource } from './sources/createDirectorySource';
-import { HostAgentSession } from './HostAgentSession';
+import { AgentHostTask } from './AgentHostTask';
 
-export class Host {
+export class AgentHost {
   hostname: string;
   port: number;
+  tasks: Record<string, AgentHostTask> = {};
 
   constructor(hostname: string, port: number) {
     this.hostname = hostname;
@@ -24,13 +25,13 @@ export class Host {
     });
   }
 
-  createAgent(
+  startTask(
     repoName: string,
     taskDescription: string,
     modelName: string,
     openAIApiKey: string
-  ): HostAgentSession {
-    return new HostAgentSession(
+  ): AgentHostTask {
+    return new AgentHostTask(
       `ws://${this.hostname}:${this.port}/agent`,
       repoName,
       taskDescription,
