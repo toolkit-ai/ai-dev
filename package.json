@@ -1,10 +1,16 @@
 {
   "name": "root",
   "private": true,
+  "engines": {
+    "node": ">=18"
+  },
   "devDependencies": {
     "@tsconfig/esm": "^1.0.3",
     "@tsconfig/node18": "^2.0.1",
     "@tsconfig/strictest": "^2.0.1",
     "lerna": "^7.0.1"
-  }
+  },
+  "workspaces": [
+    "magnet-agent"
+  ]
 }
