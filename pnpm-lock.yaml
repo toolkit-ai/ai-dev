@@ -29,9 +29,6 @@ importers:
       '@fastify/websocket':
         specifier: ^8.1.0
         version: 8.1.0
-      '@magnet-agent/agent':
-        specifier: 'link:'
-        version: 'link:'
       '@octokit/rest':
         specifier: ^19.0.11
         version: 19.0.11
