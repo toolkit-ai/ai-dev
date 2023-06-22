@@ -10,12 +10,12 @@ This package contains the implementation of the agent, core tools, and an implem
 
 ## Install
 
-**Generally, you won't work with this package directly. You'll want to use a package tailored to a specific container API, such as `@magnet-agent/local` or `@magnet-agent/cloud-aws`.**
+**Generally, you won't work with this package directly. You'll want to use it via a host tailord to a specific specific container API, such as `@magnet-agent/host-local` or `@magnet-agent/host-aws`.**
 
 However, if you want to use this package directly, you can install it with:
 
 ```bash
-npm install @magnet-agent/core
+npm install @magnet-agent/agent
 ```
 
 ## Usage
@@ -27,7 +27,7 @@ With Magnet Agent, there's a few layers of abstraction:
 1. **Agent**. The agent is the core logic that runs tasks. An agent is spawned for each task.
 2. **Agent Server**. The agent server is the server that runs in the container, exposing the agent to the host over a WebSockets wire protocol.
 2. **Host**. The host is the process that runs the agent. It's responsible for communicating between the agent and the user.
-3. **Container API**. The container API is the interface that boots the container that the agent server runs in.
+3. **Host Container API**. The host container API is the interface that boots the container that the agent server runs in.
 
 This package contains the agent, agent server, and wire protocol. You can use it to build your own agent server, or a container API that uses the agent server:
 
@@ -42,7 +42,7 @@ import {
   FileInsertTextTool,
   FileReplaceLinesTool,
   FileDeletionTool,
-} from '@magnet-agent/core';
+} from '@magnet-agent/agent';
 import { HOST, PORT } from './config';
 
 // Add tools to the agent server

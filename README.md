@@ -37,8 +37,9 @@ This repository is a monorepo that we manage using Lerna. That means that we act
 
 | Package | Description 
 | --- | ---
-| [`@magnet-agent/core`](./packages/core/README.md) | Core logic for running tasks.
-| [`@magnet-agent/local`](./packages/local/README.md) | Local container API and CLI.
+| [`@magnet-agent/agent`](./packages/agent/README.md) | Implementation of the agent.
+| [`@magnet-agent/host-core`](./packages/host-core/README.md) | Implementation of a host, used for building a container API.
+| [`@magnet-agent/host-local`](./packages/host-local/README.md) | Local container API.
 | `@magnet-agent/cloud-aws` | AWS container API (coming soon).
 
 See readmes in the respective packages for more info.
@@ -59,11 +60,11 @@ Or, you can build a specific package using `lerna run build --scope @magnet-agen
 Once you've built the packages, you can run the CLI by calling:
 
 ```bash
-cd packages/local
+cd packages/host-local
 OPENAI_API_KEY=your_openai_api_key_here  npx magnet-agent -f ./ --task "Browse and understand the codebase / packaging here, and then based on what you learn, edit the README.md to show how to use npx magnet-agent, documenting all of the different parameters in defined in cmd.ts" -o ./test.md -r -of md -m gpt-4
 ```
 
-You can also add a `.env` file `packages/local` with your `OPENAI_API_KEY` if you don't want to pass it in as an environment variable.
+You can also add a `.env` file `packages/host-local` with your `OPENAI_API_KEY` if you don't want to pass it in as an environment variable.
 
 ## License
 

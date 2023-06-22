@@ -6,10 +6,10 @@ import type { StructuredTool } from 'langchain/tools';
 import { v4 as uuid } from 'uuid';
 import type { AgentMessage } from './AgentMessage';
 import type {
-  HostMessage,
-  HostResponseMessage,
-  HostStartMessage,
-} from './HostMessage';
+  AgentHostMessage,
+  AgentHostResponseMessage,
+  AgentHostStartMessage,
+} from './AgentHostMessage';
 import { AgentModel } from './AgentModel';
 import type { AgentRepos } from './AgentRepos';
 import { AgentCallbackHandler } from './AgentCallbackHandler';
@@ -37,7 +37,7 @@ export class Agent {
     this.sendMessage = sendMessage;
   }
 
-  handleMessage(message: HostMessage) {
+  handleMessage(message: AgentHostMessage) {
     switch (message.type) {
       case 'start':
         this.handleStartMessage(message);
@@ -48,7 +48,7 @@ export class Agent {
     }
   }
 
-  private async handleStartMessage(message: HostStartMessage) {
+  private async handleStartMessage(message: AgentHostStartMessage) {
     if (this.executor) {
       throw new Error('Agent is already running');
     }
@@ -90,7 +90,7 @@ export class Agent {
     }
   }
 
-  private handleResponseMessage(message: HostResponseMessage) {
+  private handleResponseMessage(message: AgentHostResponseMessage) {
     const { requestId, response, error } = message;
     const request = this.requests[requestId];
     if (!request) {

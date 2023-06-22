@@ -7,10 +7,6 @@ import FileReadTool from './tools/FileReadTool';
 import FileReplaceLinesTool from './tools/FileReplaceLinesTool';
 import SearchTool from './tools/SearchTool';
 
-export { createAgentServer } from './createAgentServer';
-
-export { formatAsMarkdown } from './formats/formatAsMarkdown';
-
 export {
   DirectoryReadTool,
   FileCreationTool,
@@ -22,4 +18,8 @@ export {
   SearchTool,
 };
 
-export { Host } from './Host';
+export { createAgentServer } from './createAgentServer';
+
+export type * from './AgentMessage';
+export type * from './AgentHostMessage';
+export type * from './AgentResult';

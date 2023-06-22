@@ -15,7 +15,7 @@ This package provides the container API and CLI for running Magnet Agent in a lo
 However, you can try Magnet Agent without Magnet with our CLI:
 
 ```bash
-npm install @magnet-agent/local
+npm install @magnet-agent/host-local
 ```
 
 You'll need to have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running on your machine.
@@ -44,7 +44,7 @@ Other useful options:
 This package provides an API for running Magnet Agent in a local Docker container.
 
 ```ts
-import {Host, createImage, createContainer, waitForContainer} from '@magnet-agent/local';
+import {Host, createImage, createContainer, waitForContainer} from '@magnet-agent/host-local';
 
 (async function runAgent() {
   // Boot the Docker container.
@@ -53,13 +53,13 @@ import {Host, createImage, createContainer, waitForContainer} from '@magnet-agen
   await waitForContainer();
 
   // Connect to a local Docker daemon.
-  const host = new Host(HOST, PORT, modelName, openAIApiKey);
+  const host = new AgentHost(HOST, PORT, modelName, openAIApiKey);
 
   // Upload the folder to the local Docker daemon for use in coding projects by agents.
   await host.uploadDirectory(folderName, folder);
 
   // Create an agent to perform a task.
-  const session = host.createAgent(folderName, task);
+  const session = host.runTask(folderName, task, /* ...snip... */);
   session.on('action', (action) => {
     // Stream the agent's actions to the console.
   });

@@ -5,7 +5,7 @@ import { sync as walkSync } from 'walkdir';
 import ignore from 'ignore';
 import fs from 'fs/promises';
 
-function findGitignore(currentDir: string) {
+function findGitignore(currentDir: string): string | null {
   const gitignorePath = path.join(currentDir, '.gitignore');
 
   if (existsSync(gitignorePath)) {
