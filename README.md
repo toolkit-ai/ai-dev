@@ -12,12 +12,12 @@ Magent Agent is a tool-enabled coding assistant that can perform open-ended task
 However, you can try Magnet Agent without Magnet with our CLI:
 
 ```bash
-npm install @magnet-agent/local
+npm install magnet-agent
 ```
 
-You'll need to have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running on your machine.
-
 ## Usage
+
+You'll need to have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running on your machine.
 
 You can run Magnet Agent with our CLI by calling:
 
@@ -28,21 +28,6 @@ OPENAI_API_KEY=your_openai_api_key_here npx magnet-agent -f ./ -t "Your task her
 - `-f` is the path to the folder you want to run the task on.
 - `-t` is the task description.
 - `-o` is the path to the file where the agent will output the results.
-
-There's APIs for local and cloud environments that you can use to run the agent programmatically.
-
-## Packages
-
-This repository is a monorepo that we manage using Lerna. That means that we actually publish several packages to npm from the same codebase, including:
-
-| Package | Description 
-| --- | ---
-| [`@magnet-agent/agent`](./packages/agent/README.md) | Implementation of the agent.
-| [`@magnet-agent/host-core`](./packages/host-core/README.md) | Implementation of a host, used for building a container API.
-| [`@magnet-agent/host-local`](./packages/host-local/README.md) | Local container API.
-| `@magnet-agent/cloud-aws` | AWS container API (coming soon).
-
-See readmes in the respective packages for more info.
 
 ## Development
 
@@ -55,12 +40,12 @@ pnpm install
 
 Then, you can build all of the packages using `lerna run build`.
 
-Or, you can build a specific package using `lerna run build --scope @magnet-agent/package-name`.
+Or, you can build a specific package using `lerna run build --scope package-name`.
 
 Once you've built the packages, you can run the CLI by calling:
 
 ```bash
-cd packages/host-local
+cd magnet-agent
 OPENAI_API_KEY=your_openai_api_key_here  npx magnet-agent -f ./ --task "Browse and understand the codebase / packaging here, and then based on what you learn, edit the README.md to show how to use npx magnet-agent, documenting all of the different parameters in defined in cmd.ts" -o ./test.md -r -of md -m gpt-4
 ```
 
