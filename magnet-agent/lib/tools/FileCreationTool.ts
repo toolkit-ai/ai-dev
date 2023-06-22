@@ -28,8 +28,7 @@ class FileCreationTool extends StructuredTool<typeof FileCreationSchema> {
       await fs.writeFile(path, content);
       return `File created at ${path}`;
     } catch (error) {
-      console.error(`Error creating file at ${path}`, error);
-      throw error;
+      return `Error creating file at ${path}: "${(error as Error).message}".`;
     }
   }
 }
