@@ -34,10 +34,10 @@ export async function createDirectorySource(directoryPath: string) {
   walkSync(directoryPath)
     .map((absolute) => path.relative(path.resolve(directoryPath), absolute))
     .filter(gitignore.createFilter())
-    .forEach((relative) =>
-      archive.file(path.resolve(relative), { name: relative })
-    );
-  archive.finalize();
+    .forEach((relative) => {
+      archive.file(path.resolve(relative), { name: relative });
+    });
 
+  await archive.finalize();
   return archive;
 }
