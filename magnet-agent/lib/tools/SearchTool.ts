@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 // Define the Zod schema for the input
 const SearchSchema = z.object({
-  directory: z.string().optional(),
+  directory: z.string(),
   searchString: z.string(),
 });
 
@@ -25,8 +25,7 @@ class SearchTool extends StructuredTool<typeof SearchSchema> {
 
   // Implement the protected abstract method
   protected async _call(arg: SearchType): Promise<string> {
-    const directory = arg.directory || process.cwd(); // Use provided directory or current working directory
-    const { searchString } = arg;
+    const { searchString, directory } = arg;
     let result = '';
 
     try {
