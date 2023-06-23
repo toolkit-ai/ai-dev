@@ -36,7 +36,8 @@
     "clean": "rm -rf dist && node ./scripts/clean-import-stubs.js",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "build": "pnpm clean && tsc --project tsconfig.json && node ./scripts/add-import-stubs.js",
+    "prepublish": "pnpm run build",
+    "build": "pnpm clean && node ./scripts/write-version.js && tsc --project tsconfig.json && node ./scripts/add-import-stubs.js",
     "start": "node ./dist/cli/agentServer.js"
   },
   "dependencies": {

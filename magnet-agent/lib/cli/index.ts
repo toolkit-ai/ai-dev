@@ -82,32 +82,41 @@ async function runAsyncTask() {
     process.exit(1);
   }
 
-  if (!isDockerDesktopInstalled()) {
+  if (!(await isDockerDesktopInstalled())) {
     console.error(
       'Docker Desktop is not installed. Please visit https://www.docker.com/products/docker-desktop to install it.'
     );
     process.exit(1);
   }
 
-  if (!isDockerDesktopRunning()) {
+  if (!(await isDockerDesktopRunning())) {
     logContainer('Docker Desktop is not running, launching it now...');
-    launchDockerDesktop();
+    await launchDockerDesktop();
     await waitForDockerDesktop();
   }
 
-  if (!imageExists() || rebuild) {
+  const [hasImage, hasContainer] = await Promise.all([
+    imageExists(),
+    containerExists(),
+  ]);
+
+  if (!hasImage || rebuild) {
     logContainer('Creating image...');
-    createImage(path.join(__dirname, '..', '..'), 'Dockerfile');
+    if (hasContainer) {
+      logContainer('Deleting existing container...');
+      await deleteContainer();
+    }
+    await createImage(path.join(__dirname, '..', '..'), 'Dockerfile');
   }
 
-  if (!containerExists() || rebuild) {
-    if (containerExists()) {
+  if (!hasContainer || rebuild) {
+    if (hasContainer) {
       logContainer('Deleting existing container...');
-      deleteContainer();
+      await deleteContainer();
     }
 
     logContainer('Creating container...');
-    createContainer();
+    await createContainer();
   }
 
   logContainer('Waiting for container...');
