@@ -3,8 +3,8 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import archiver from 'archiver';
-import { sync as walkSync } from 'walkdir';
 import ignore from 'ignore';
+import { sync as walkSync } from 'walkdir';
 
 function findGitignore(currentDir: string): string | null {
   const gitignorePath = path.join(currentDir, '.gitignore');

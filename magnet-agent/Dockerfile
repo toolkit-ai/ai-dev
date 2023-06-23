@@ -8,4 +8,4 @@ RUN pnpm install
 
 EXPOSE 8080
 
-CMD [ "pnpm", "start" ]
+CMD [ "pnpm", "magnet-agent-server" ]

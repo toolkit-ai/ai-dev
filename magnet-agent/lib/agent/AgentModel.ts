@@ -24,6 +24,7 @@ export class AgentModel extends BaseLLM {
   override async _generate(
     prompts: string[],
     options: this['ParsedCallOptions'],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _?: CallbackManagerForLLMRun | undefined
   ): Promise<LLMResult> {
     return this.sendRequest({

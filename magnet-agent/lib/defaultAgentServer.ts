@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { createAgentServer } from '../agent/createAgentServer';
+import { createAgentServer } from './agent/createAgentServer';
 import {
   FileReadTool,
   DirectoryReadTool,
@@ -10,8 +10,8 @@ import {
   FileInsertTextTool,
   FileReplaceLinesTool,
   FileDeletionTool,
-} from '../tools';
-import { HOST, PORT } from './config';
+} from './tools';
+import { HOST, PORT } from './defaultAgentServerConfig';
 
 const server = createAgentServer({
   tools: [

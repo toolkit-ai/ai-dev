@@ -12,9 +12,9 @@ import {
   launchDockerDesktop,
   waitForDockerDesktop,
   waitForServer,
-} from '../containers/local';
-import { Host } from '../host/Host';
-import { HOST, PORT } from './config';
+} from './containers/local';
+import { Host } from './host/Host';
+import { HOST, PORT } from './defaultAgentServerConfig';
 import { readFile, writeFile } from 'fs/promises';
 import path from 'path';
 import dotenv from 'dotenv';
@@ -23,10 +23,10 @@ import indentString from 'indent-string';
 import {
   createClarifyingQuestions,
   createClarifiedTaskDescription,
-} from '../host/HostTaskClarification';
+} from './host/HostTaskClarification';
 import { OpenAI } from 'langchain/llms/openai';
 import readline from 'readline';
-import { formatAgentResult } from '../host/formatAgentResult';
+import { formatAgentResult } from './host/formatAgentResult';
 
 dotenv.config();
 
@@ -106,7 +106,7 @@ async function runAsyncTask() {
       logContainer('Deleting existing container...');
       await deleteContainer();
     }
-    await createImage(path.join(__dirname, '..', '..'), 'Dockerfile');
+    await createImage(path.join(__dirname, '..'), 'Dockerfile');
   }
 
   if (!hasContainer || rebuild) {
@@ -116,11 +116,11 @@ async function runAsyncTask() {
     }
 
     logContainer('Creating container...');
-    await createContainer();
+    await createContainer(PORT);
   }
 
   logContainer('Waiting for container...');
-  await waitForServer();
+  await waitForServer(PORT);
   logContainer(chalk.green('Container ready! ✅'));
 
   const model = new OpenAI({ modelName, openAIApiKey });
