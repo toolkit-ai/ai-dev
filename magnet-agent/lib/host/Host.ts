@@ -2,6 +2,7 @@ import FormData from 'form-data';
 import axios from 'axios';
 import { createDirectorySource } from './createDirectorySource';
 import { HostTask } from './HostTask';
+import type { BaseLLM } from 'langchain/llms/base';
 
 export class Host {
   hostname: string;
@@ -27,15 +28,13 @@ export class Host {
   startTask(
     repoName: string,
     taskDescription: string,
-    modelName: string,
-    openAIApiKey: string
+    model: BaseLLM
   ): HostTask {
     return new HostTask(
       `ws://${this.hostname}:${this.port}/agent`,
       repoName,
       taskDescription,
-      modelName,
-      openAIApiKey
+      model
     );
   }
 }

@@ -25,6 +25,7 @@ OPENAI_API_KEY=your_openai_api_key_here npx magnet-agent -f ./ -t "Your task her
 - `-f` is the path to the folder you want to run the task on.
 - `-t` is the task description.
 - `-o` is the path to the file where the agent will output the results.
+- `-c` will prompt the agent to clarify the task description before implementing.
 
 You'll need to have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running on your machine.
 

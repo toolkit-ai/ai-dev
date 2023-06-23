@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 
-import { OpenAI } from 'langchain/llms/openai';
+import type { BaseLLM } from 'langchain/llms/base';
 import WebSocket from 'ws';
 
 import type { HostMessage } from './HostMessage';
@@ -16,20 +16,16 @@ import type { AgentResult } from '../agent/AgentResult';
 export class HostTask extends EventEmitter {
   socket: WebSocket;
 
-  model: OpenAI;
+  model: BaseLLM;
 
   constructor(
     url: string,
     repoName: string,
     taskDescription: string,
-    modelName: string,
-    openAIApiKey: string
+    model: BaseLLM
   ) {
     super();
-    this.model = new OpenAI({
-      modelName,
-      openAIApiKey,
-    });
+    this.model = model;
     this.socket = new WebSocket(url);
     this.socket.on('open', () => {
       this.sendMessage({
