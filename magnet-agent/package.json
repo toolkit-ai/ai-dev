@@ -38,7 +38,7 @@
     "typecheck": "tsc --noEmit",
     "prepublish": "pnpm run build",
     "build": "pnpm clean && tsc --project tsconfig.json && node ./scripts/add-import-stubs.js",
-    "version": "node ./scripts/write-version.js",
+    "version": "node ./scripts/write-version.js && git add .",
     "start-agent-server": "node ./dist/defaultAgentServer.js"
   },
   "dependencies": {
