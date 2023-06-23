@@ -1,5 +1,6 @@
 # Dockerfile
 FROM node:18.16
+RUN npm install -g pnpm
 
 WORKDIR /app
 COPY . .
