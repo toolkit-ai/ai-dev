@@ -21,8 +21,19 @@ import dotenv from 'dotenv';
 import chalk from 'chalk';
 import indentString from 'indent-string';
 import { formatAgentResult } from '../agent/formatAgentResult';
+import {
+  createClarifyingQuestions,
+  createClarifiedTaskDescription,
+} from '../host/HostTaskClarification';
+import { OpenAI } from 'langchain/llms/openai';
+import readline from 'readline';
 
 dotenv.config();
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
 const program = new Command();
 program
@@ -35,7 +46,8 @@ program
     'Specify the OpenAI model to use',
     'gpt-3.5-turbo'
   )
-  .option('-r, --rebuild', 'Rebuild the image and container before running');
+  .option('-r, --rebuild', 'Rebuild the image and container before running')
+  .option('-c, --clarify', 'Clarify the task description before running');
 
 program.parse(process.argv);
 
@@ -46,6 +58,7 @@ async function runAsyncTask() {
     taskfile,
     task,
     rebuild,
+    clarify,
     model: modelName,
   } = program.opts();
 
@@ -101,17 +114,37 @@ async function runAsyncTask() {
   await waitForServer();
   logContainer(chalk.green('Container ready! ✅'));
 
+  const model = new OpenAI({ modelName, openAIApiKey });
+
+  let clarifiedTaskDescription = taskDescription;
+  if (clarify) {
+    const questions = await createClarifyingQuestions(taskDescription, model);
+    let clarifications: [string, string][] = [];
+    for (const question of questions) {
+      logAgent(chalk.blue.bold('Question:') + ` ${question}: `);
+      const answer = await new Promise((resolve) =>
+        rl.question(question, (answer) => resolve(answer))
+      );
+      clarifications.push([question, answer as string]);
+    }
+
+    clarifiedTaskDescription = await createClarifiedTaskDescription(
+      taskDescription,
+      clarifications,
+      model
+    );
+    logAgent(
+      chalk.blue.bold('Clarified task description...\n\n') +
+        indentString(clarifiedTaskDescription, 2)
+    );
+  }
+
   logAgent('Running task...');
 
   const host = new Host(HOST, PORT);
   await host.uploadDirectory(folder, folder);
 
-  const session = host.startTask(
-    folder,
-    taskDescription,
-    modelName,
-    openAIApiKey
-  );
+  const session = host.startTask(folder, clarifiedTaskDescription, model);
   session.on('action', (action) => {
     logAgent(
       chalk.blue.bold('Performed action...\n\n') +
