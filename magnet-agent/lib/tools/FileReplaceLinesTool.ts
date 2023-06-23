@@ -45,8 +45,9 @@ class FileReplaceLinesTool extends StructuredTool<
 
       return `Lines ${startLine} to ${endLine} in file at ${path} have been replaced.`;
     } catch (error) {
-      console.error(`Error replacing lines in file at ${path}`, error);
-      throw error;
+      return `Error replacing ${startLine} to ${endLine} in file at ${path}: "${
+        (error as Error).message
+      }".`;
     }
   }
 }

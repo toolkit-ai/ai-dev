@@ -40,8 +40,9 @@ class FileInsertTextTool extends StructuredTool<typeof FileInsertTextSchema> {
 
       return `Text inserted at line ${lineNumber} in file at ${path}.`;
     } catch (error) {
-      console.error(`Error inserting text in file at ${path}`, error);
-      throw error;
+      return `Error inserting text at ${lineNumber} in file ${path}: "${
+        (error as Error).message
+      }".`;
     }
   }
 }

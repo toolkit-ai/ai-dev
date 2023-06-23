@@ -39,8 +39,9 @@ class SearchTool extends StructuredTool<typeof SearchSchema> {
         return acc;
       }, Promise.resolve(result));
     } catch (error) {
-      console.error(`Error during search in directory ${directory}`, error);
-      throw error;
+      return `Error searching for "${searchString}" in ${directory}: "${
+        (error as Error).message
+      }".`;
     }
 
     return result;

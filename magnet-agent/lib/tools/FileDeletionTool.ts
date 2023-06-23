@@ -26,8 +26,7 @@ class FileDeletionTool extends StructuredTool<typeof FileDeletionSchema> {
       await fs.unlink(path);
       return `File deleted at ${path}`;
     } catch (error) {
-      console.error(`Error deleting file at ${path}`, error);
-      throw error;
+      return `Error deleting file at ${path}: "${(error as Error).message}".`;
     }
   }
 }

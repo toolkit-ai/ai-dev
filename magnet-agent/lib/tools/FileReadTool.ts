@@ -27,9 +27,7 @@ class FileReadTool extends StructuredTool<typeof FilePathSchema> {
       const data = await fs.readFile(path);
       return data.toString();
     } catch (error) {
-      const message = `Error reading file at ${path}`;
-      console.error(message, error);
-      return message;
+      return `Error reading file at ${path}: "${(error as Error).message}".`;
     }
   }
 }

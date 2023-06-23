@@ -26,8 +26,9 @@ class DirectoryReadTool extends StructuredTool<typeof DirectoryPathSchema> {
       const files = await fs.readdir(path);
       return files.join(', ');
     } catch (error) {
-      console.error(`Error reading directory at ${path}`, error);
-      throw error;
+      return `Error reading directory at ${path}: "${
+        (error as Error).message
+      }".`;
     }
   }
 }

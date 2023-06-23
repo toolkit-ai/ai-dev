@@ -40,8 +40,9 @@ class FileDeleteLinesTool extends StructuredTool<typeof FileDeleteLinesSchema> {
 
       return `Lines ${startLine} to ${endLine} in file at ${path} have been deleted.`;
     } catch (error) {
-      console.error(`Error deleting lines from file at ${path}`, error);
-      throw error;
+      return `Error deleting lines from file at ${path}: "${
+        (error as Error).message
+      }".`;
     }
   }
 }
