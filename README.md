@@ -49,7 +49,7 @@ cd magnet-agent
 OPENAI_API_KEY=your_openai_api_key_here  npx magnet-agent -f ./ --task "Browse and understand the codebase / packaging here, and then based on what you learn, edit the README.md to show how to use npx magnet-agent, documenting all of the different parameters in defined in cmd.ts" -o ./test.md -r -of md -m gpt-4
 ```
 
-You can also add a `.env` file `packages/host-local` with your `OPENAI_API_KEY` if you don't want to pass it in as an environment variable.
+You can also add a `.env` file in `magnet-agent` with your `OPENAI_API_KEY` if you don't want to pass it in as an environment variable.
 
 ## License
 
