@@ -15,7 +15,7 @@ import {
 } from '../containers/local';
 import { Host } from '../host/Host';
 import { HOST, PORT } from './config';
-import { writeFile } from 'fs/promises';
+import { readFile, writeFile } from 'fs/promises';
 import path from 'path';
 import dotenv from 'dotenv';
 import chalk from 'chalk';
@@ -27,13 +27,9 @@ dotenv.config();
 const program = new Command();
 program
   .requiredOption('-f, --folder <repo>', 'Specify the folder/repository')
-  .requiredOption('-t, --task <task>', 'Specify the task')
   .requiredOption('-o, --outfile <outfile>', 'Specify the outfile')
-  .option(
-    '-of, --outputFormat <format>',
-    'Specify the output format json or md',
-    'md'
-  )
+  .option('-t, --task <task>', 'Specify the task')
+  .option('-tf, --taskfile <taskfile>', 'Specify the task as an input file')
   .option(
     '-m, --model <model>',
     'Specify the OpenAI model to use',
@@ -47,16 +43,28 @@ async function runAsyncTask() {
   const {
     folder,
     outfile,
-    outputFormat,
+    taskfile,
     task,
     rebuild,
     model: modelName,
   } = program.opts();
 
+  let taskDescription: string = task;
+  if (taskfile) {
+    taskDescription = await readFile(path.resolve(taskfile), 'utf-8');
+  }
+
+  if (!taskDescription) {
+    console.error(
+      'No task or taskfile specified. Please specify one with the `-t` or `-tf` flag.'
+    );
+    process.exit(1);
+  }
+
   const openAIApiKey = process.env['OPENAI_API_KEY'];
   if (!openAIApiKey) {
     console.error(
-      'No OPENAI_API_KEY found in environment. Set it in your .env file.'
+      'No OPENAI_API_KEY found in environment. Set it in your shell environment by passing `OPENAI_API_KEY=[key] npx magnet-agent...`'
     );
     process.exit(1);
   }
@@ -98,7 +106,12 @@ async function runAsyncTask() {
   const host = new Host(HOST, PORT);
   await host.uploadDirectory(folder, folder);
 
-  const session = host.startTask(folder, task, modelName, openAIApiKey);
+  const session = host.startTask(
+    folder,
+    taskDescription,
+    modelName,
+    openAIApiKey
+  );
   session.on('action', (action) => {
     logAgent(
       chalk.blue.bold('Performed action...\n\n') +
@@ -116,19 +129,7 @@ async function runAsyncTask() {
 
   try {
     const result = await session.getResult();
-
-    switch (outputFormat) {
-      case 'md':
-        await writeFile(path.resolve(outfile), formatAgentResult(result));
-        break;
-      case 'json':
-        await writeFile(path.resolve(outfile), JSON.stringify(result, null, 2));
-        break;
-      default:
-        console.error(`Unknown output format: ${outputFormat}`);
-        process.exit(1);
-    }
-
+    await writeFile(path.resolve(outfile), formatAgentResult(result));
     logAgent(
       chalk.green.bold('Complete! Output written to: ') + `${outfile} ✅`
     );
