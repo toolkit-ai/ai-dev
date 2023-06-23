@@ -17,17 +17,19 @@ npm install magnet-agent
 
 ## Usage
 
-You'll need to have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running on your machine.
-
 You can run Magnet Agent with our CLI by calling:
 
 ```bash
-OPENAI_API_KEY=your_openai_api_key_here npx magnet-agent -f ./ -t "Your task here." -o ./output
+OPENAI_API_KEY=your_openai_api_key_here npx magnet-agent -f ./ -t "Your task here." -o ./output.md
 ```
 
+Here's what each of the options mean:
 - `-f` is the path to the folder you want to run the task on.
-- `-t` is the task description.
+- `-t` is the task description, alternately you can pass in a task file with `-tf`.
 - `-o` is the path to the file where the agent will output the results.
+- `-m` is the model to use. Defaults to `gpt-3.5-turbo`.
+
+You'll need to have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running on your machine.
 
 ## Development
 
