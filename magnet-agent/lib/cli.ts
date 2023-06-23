@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
+import prompts from 'prompts';
+import kleur from 'kleur';
 import {
   containerExists,
   createContainer,
@@ -18,61 +20,100 @@ import { HOST, PORT } from './defaultAgentServerConfig';
 import { readFile, writeFile } from 'fs/promises';
 import path from 'path';
 import dotenv from 'dotenv';
-import chalk from 'chalk';
 import indentString from 'indent-string';
 import {
   createClarifyingQuestions,
   createClarifiedTaskDescription,
 } from './host/HostTaskClarification';
 import { OpenAI } from 'langchain/llms/openai';
-import readline from 'readline';
 import { formatAgentResult } from './host/formatAgentResult';
+import { z } from 'zod';
 
 dotenv.config();
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-
 const program = new Command();
 program
-  .requiredOption('-f, --folder <repo>', 'Specify the folder/repository')
-  .requiredOption('-o, --outfile <outfile>', 'Specify the outfile')
+  .option('-f, --folder <repo>', 'Specify the folder/repository')
+  .option(
+    '-o, --outfile <outfile>',
+    "Specify a file to output the agent's results in"
+  )
   .option('-t, --task <task>', 'Specify the task')
   .option('-tf, --taskfile <taskfile>', 'Specify the task as an input file')
-  .option(
-    '-m, --model <model>',
-    'Specify the OpenAI model to use',
-    'gpt-3.5-turbo'
-  )
+  .option('-m, --model <model>', 'Specify the OpenAI model to use')
   .option('-r, --rebuild', 'Rebuild the image and container before running')
   .option('-c, --clarify', 'Clarify the task description before running');
 
-program.parse(process.argv);
+const optionSchema = z.object({
+  folder: z.string(),
+  outfile: z.string(),
+  taskDescription: z.string(),
+  model: z.string(),
+  clarify: z.boolean(),
+});
 
 async function runAsyncTask() {
+  const externalOptions = program.parse(process.argv).opts();
+  console.log();
+
+  prompts.override({
+    ...externalOptions,
+    taskDescription: externalOptions['taskfile']
+      ? await readFile(path.resolve(externalOptions['taskfile']), 'utf-8')
+      : externalOptions['task'],
+  });
+
+  const options = await prompts([
+    {
+      type: 'text',
+      name: 'folder',
+      initial: process.cwd(),
+      message: 'Specify the folder/repository:',
+      validate: (value: string) => (value ? true : 'This field is required'),
+    },
+    {
+      type: 'text',
+      name: 'taskDescription',
+      message: 'Specify the task:',
+      validate: (value: string) => (value ? true : 'This field is required'),
+    },
+    {
+      type: 'text',
+      name: 'outfile',
+      message: "Specify a file to output the agent's results in:",
+      initial: 'results.md',
+      validate: (value: string) => (value ? true : 'This field is required'),
+    },
+    {
+      type: 'select',
+      name: 'model',
+      message: 'Specify the OpenAI model to use:',
+      initial: 0,
+      choices: [
+        { title: 'GPT-3 Turbo', value: 'gpt-3-turbo' },
+        { title: 'GPT-4', value: 'gpt-4' },
+      ],
+    },
+    {
+      type: 'toggle',
+      name: 'clarify',
+      message: 'Clarify the task description before starting?',
+      initial: false,
+      active: 'yes',
+      inactive: 'no',
+    },
+  ]);
+
+  optionSchema.parse(options);
+
+  const { rebuild } = externalOptions;
   const {
     folder,
     outfile,
-    taskfile,
-    task,
-    rebuild,
+    taskDescription,
     clarify,
     model: modelName,
-  } = program.opts();
-
-  let taskDescription: string = task;
-  if (taskfile) {
-    taskDescription = await readFile(path.resolve(taskfile), 'utf-8');
-  }
-
-  if (!taskDescription) {
-    console.error(
-      'No task or taskfile specified. Please specify one with the `-t` or `-tf` flag.'
-    );
-    process.exit(1);
-  }
+  } = options;
 
   const openAIApiKey = process.env['OPENAI_API_KEY'];
   if (!openAIApiKey) {
@@ -95,20 +136,16 @@ async function runAsyncTask() {
     await waitForDockerDesktop();
   }
 
-  const [hasImage, hasContainer] = await Promise.all([
-    imageExists(),
-    containerExists(),
-  ]);
-
-  if (!hasImage || rebuild) {
+  if (!(await imageExists()) || rebuild) {
     logContainer('Creating image...');
-    if (hasContainer) {
+    if (await containerExists()) {
       logContainer('Deleting existing container...');
       await deleteContainer();
     }
     await createImage(path.join(__dirname, '..'), 'Dockerfile');
   }
 
+  const hasContainer = await containerExists();
   if (!hasContainer || rebuild) {
     if (hasContainer) {
       logContainer('Deleting existing container...');
@@ -121,19 +158,21 @@ async function runAsyncTask() {
 
   logContainer('Waiting for container...');
   await waitForServer(PORT);
-  logContainer(chalk.green('Container ready! ✅'));
+  logContainer(kleur.green('Container ready! ✅'));
 
   const model = new OpenAI({ modelName, openAIApiKey });
 
   let clarifiedTaskDescription = taskDescription;
   if (clarify) {
+    logAgent('A few clarifying questions about the task...');
     const questions = await createClarifyingQuestions(taskDescription, model);
     let clarifications: [string, string][] = [];
     for (const question of questions) {
-      logAgent(chalk.blue.bold('Question:') + ` ${question}: `);
-      const answer = await new Promise((resolve) =>
-        rl.question(question, (answer) => resolve(answer))
-      );
+      const answer = await prompts.prompt({
+        type: 'text',
+        name: 'question',
+        message: question,
+      });
       clarifications.push([question, answer as string]);
     }
 
@@ -143,7 +182,7 @@ async function runAsyncTask() {
       model
     );
     logAgent(
-      chalk.blue.bold('Clarified task description...\n\n') +
+      kleur.blue().bold('Clarified task description...\n\n') +
         indentString(clarifiedTaskDescription, 2)
     );
   }
@@ -156,14 +195,14 @@ async function runAsyncTask() {
   const session = host.startTask(folder, clarifiedTaskDescription, model);
   session.on('action', (action) => {
     logAgent(
-      chalk.blue.bold('Performed action...\n\n') +
+      kleur.blue().bold('Performed action...\n\n') +
         indentString(
-          `${chalk.bold.underline('Tool')}: ${action.tool}\n\n` +
-            `${chalk.bold.underline('Tool Input')}:\n${indentString(
+          `${kleur.bold().underline('Tool')}: ${action.tool}\n\n` +
+            `${kleur.bold().underline('Tool Input')}:\n${indentString(
               JSON.stringify(action.toolInput, null, 2),
               2
             )}\n\n` +
-            `${chalk.bold.underline('Log')}:\n${indentString(action.log)}`,
+            `${kleur.bold().underline('Log')}:\n${indentString(action.log)}`,
           2
         )
     );
@@ -173,19 +212,19 @@ async function runAsyncTask() {
     const result = await session.getResult();
     await writeFile(path.resolve(outfile), formatAgentResult(result));
     logAgent(
-      chalk.green.bold('Complete! Output written to: ') + `${outfile} ✅`
+      kleur.green().bold('Complete! Output written to: ') + `${outfile} ✅`
     );
   } catch (e) {
-    logAgent(chalk.red.bold('Error!') + '\n\n' + indentString(e as any, 2));
+    logAgent(kleur.red().bold('Error!') + '\n\n' + indentString(e as any, 2));
   }
 }
 
 function logContainer(message: string) {
-  console.log(chalk.inverse.bold('Container') + ' ' + message);
+  console.log(kleur.inverse().bold('Container') + ' ' + message);
 }
 
 function logAgent(message: string) {
-  console.log(chalk.blue.inverse.bold('Agent') + ' ' + message);
+  console.log(kleur.blue().inverse().bold('Agent') + ' ' + message);
 }
 
 runAsyncTask();
