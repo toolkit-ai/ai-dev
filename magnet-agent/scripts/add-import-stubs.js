@@ -5,8 +5,8 @@ const BASE_PATH = path.join(__dirname, '..');
 const STUBS = [
   ['agent.js', './dist/agent/index.js'],
   ['agent.d.ts', './dist/agent/index.js'],
-  ['containers/local.js', './dist/containers/local.js'],
-  ['containers/local.d.ts', './dist/containers/local.js'],
+  ['containers/local.js', '../dist/containers/local.js'],
+  ['containers/local.d.ts', '../dist/containers/local.js'],
 ];
 
 (async () => {
