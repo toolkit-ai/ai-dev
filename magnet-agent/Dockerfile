@@ -1,11 +1,10 @@
 # Dockerfile
 FROM node:18.16
-RUN npm install -g pnpm
 
 WORKDIR /app
 COPY . .
-RUN pnpm install
+RUN npm install
 
 EXPOSE 8080
 
-CMD [ "pnpm", "magnet-agent-server" ]
+CMD [ "npm", "magnet-agent-server" ]
