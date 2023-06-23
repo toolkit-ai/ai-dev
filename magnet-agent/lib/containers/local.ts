@@ -1,6 +1,5 @@
 import { exec as execCallback } from 'child_process';
 import { promisify } from 'util';
-import { PORT } from '../cli/config';
 import { version } from '../version';
 
 const exec = promisify(execCallback);
@@ -70,9 +69,9 @@ export async function containerExists() {
   }
 }
 
-export async function createContainer() {
+export async function createContainer(port: number) {
   await exec(
-    `docker run -d -p ${PORT}:${PORT} --name ${CONTAINER_NAME} ${IMAGE_NAME}`
+    `docker run -d -p ${port}:${port} --name ${CONTAINER_NAME} ${IMAGE_NAME}`
   );
 }
 
@@ -80,12 +79,12 @@ export async function deleteContainer() {
   await exec(`docker stop ${CONTAINER_NAME}; docker rm ${CONTAINER_NAME}`);
 }
 
-export async function waitForServer() {
+export async function waitForServer(port: number) {
   let attempts = 0;
   while (attempts < 10) {
     try {
       const { stdout: logs } = await exec(`docker logs ${CONTAINER_NAME}`);
-      if (logs.includes(`Server running on port ${PORT}`)) {
+      if (logs.includes(`Server running on port ${port}`)) {
         return;
       }
       await new Promise((resolve) => setTimeout(resolve, 3000));

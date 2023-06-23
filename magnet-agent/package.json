@@ -28,8 +28,8 @@
     "package.json"
   ],
   "bin": {
-    "magnet-agent": "./dist/cli/index.js",
-    "magnet-agent-server": "./dist/cli/agentServer.js"
+    "magnet-agent": "./dist/cli.js",
+    "magnet-agent-server": "./dist/defaultAgentServer.js"
   },
   "scripts": {
     "format": "prettier --check .",
@@ -37,8 +37,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "prepublish": "pnpm run build",
-    "build": "pnpm clean && node ./scripts/write-version.js && tsc --project tsconfig.json && node ./scripts/add-import-stubs.js",
-    "start": "node ./dist/cli/agentServer.js"
+    "build": "pnpm clean && node ./scripts/write-version.js && tsc --project tsconfig.json && node ./scripts/add-import-stubs.js"
   },
   "dependencies": {
     "@fastify/multipart": "^7.6.1",
