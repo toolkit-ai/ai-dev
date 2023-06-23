@@ -24,15 +24,16 @@ function findGitignore(currentDir: string): string | null {
 }
 
 export async function createDirectorySource(directoryPath: string) {
-  const gitignorePath = findGitignore(path.resolve(directoryPath));
+  const resolved = path.resolve(directoryPath);
+  const gitignorePath = findGitignore(resolved);
   const gitignoreList = gitignorePath
     ? (await fs.readFile(gitignorePath, 'utf8')).split('\n')
     : [];
   const gitignore = ignore().add(gitignoreList);
 
   const archive = archiver('zip', { zlib: { level: 9 } });
-  walkSync(directoryPath)
-    .map((absolute) => path.relative(path.resolve(directoryPath), absolute))
+  walkSync(resolved)
+    .map((absolute) => path.relative(resolved, absolute))
     .filter(gitignore.createFilter())
     .forEach((relative) => {
       archive.file(path.resolve(relative), { name: relative });
