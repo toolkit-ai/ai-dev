@@ -20,13 +20,13 @@ import path from 'path';
 import dotenv from 'dotenv';
 import chalk from 'chalk';
 import indentString from 'indent-string';
-import { formatAgentResult } from '../agent/formatAgentResult';
 import {
   createClarifyingQuestions,
   createClarifiedTaskDescription,
 } from '../host/HostTaskClarification';
 import { OpenAI } from 'langchain/llms/openai';
 import readline from 'readline';
+import { formatAgentResult } from '../host/formatAgentResult';
 
 dotenv.config();
 

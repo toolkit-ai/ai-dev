@@ -18,9 +18,14 @@
   },
   "files": [
     "dist/",
+    "agent.js",
+    "agent.d.ts",
+    "containers/local.js",
+    "containers/local.d.ts",
     "Dockerfile",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "package.json"
   ],
   "bin": {
     "magnet-agent": "./dist/cli/index.js",
@@ -28,10 +33,10 @@
   },
   "scripts": {
     "format": "prettier --check .",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist && node ./scripts/clean-import-stubs.js",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "build": "pnpm clean && tsc --project tsconfig.json",
+    "build": "pnpm clean && tsc --project tsconfig.json && node ./scripts/add-import-stubs.js",
     "start": "node ./dist/cli/agentServer.js"
   },
   "dependencies": {
