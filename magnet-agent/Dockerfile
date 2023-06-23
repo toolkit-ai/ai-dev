@@ -3,8 +3,8 @@ FROM node:18.16
 
 WORKDIR /app
 COPY . .
-RUN npm install
+RUN pnpm install
 
 EXPOSE 8080
 
-CMD [ "npm", "magnet-agent-server" ]
+CMD [ "pnpm", "start-agent-server" ]

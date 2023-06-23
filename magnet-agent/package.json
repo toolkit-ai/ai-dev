@@ -37,7 +37,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "prepublish": "pnpm run build",
-    "build": "pnpm clean && node ./scripts/write-version.js && tsc --project tsconfig.json && node ./scripts/add-import-stubs.js"
+    "build": "pnpm clean && node ./scripts/write-version.js && tsc --project tsconfig.json && node ./scripts/add-import-stubs.js",
+    "start-agent-server": "node ./dist/defaultAgentServer.js"
   },
   "dependencies": {
     "@fastify/multipart": "^7.6.1",
