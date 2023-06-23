@@ -1,4 +1,4 @@
-const { unlink, readdir, rmdir, stat } = require('fs/promises');
+const { unlink, readdir, rmdir } = require('fs/promises');
 const path = require('path');
 
 const { sync: walkSync } = require('walkdir');

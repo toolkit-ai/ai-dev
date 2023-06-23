@@ -1,21 +1,25 @@
-import { execSync } from 'child_process';
+import { exec as execCallback } from 'child_process';
+import { promisify } from 'util';
 import { PORT } from '../cli/config';
+import { version } from '../version';
 
-const IMAGE_NAME = 'magnet-agent';
+const exec = promisify(execCallback);
+
+const IMAGE_NAME = `magnet-agent-${version}`;
 const CONTAINER_NAME = 'magnet-agent';
 
-export function isDockerDesktopInstalled() {
+export async function isDockerDesktopInstalled() {
   try {
-    execSync(`docker --version`);
+    await exec(`docker --version`);
     return true;
   } catch (e) {
     return false;
   }
 }
 
-export function isDockerDesktopRunning() {
+export async function isDockerDesktopRunning() {
   try {
-    execSync(`docker info`);
+    await exec(`docker info`);
     return true;
   } catch (e) {
     return false;
@@ -24,61 +28,69 @@ export function isDockerDesktopRunning() {
 
 export async function launchDockerDesktop() {
   try {
-    execSync('docker info');
+    await exec('docker info');
   } catch (e) {
-    execSync('open -a Docker');
+    await exec('open -a Docker');
   }
 }
 
 export async function waitForDockerDesktop() {
-  while (!isDockerDesktopRunning()) {
+  let attempts = 0;
+  while (attempts < 10) {
+    if (await isDockerDesktopRunning()) {
+      return;
+    }
     await new Promise((resolve) => setTimeout(resolve, 3000));
+    attempts++;
   }
+  throw new Error('Docker Desktop did not start in time.');
 }
 
-export function imageExists() {
+export async function imageExists() {
   try {
-    execSync(`docker image inspect ${IMAGE_NAME}`);
+    await exec(`docker image inspect ${IMAGE_NAME}`);
     return true;
   } catch (e) {
     return false;
   }
 }
 
-export function createImage(contextPath: string, dockerfilePath: string) {
-  return execSync(
+export async function createImage(contextPath: string, dockerfilePath: string) {
+  return await exec(
     `cd ${contextPath}; docker build -t ${IMAGE_NAME} -f ${dockerfilePath} .`
   );
 }
 
-export function containerExists() {
+export async function containerExists() {
   try {
-    execSync(`docker logs ${CONTAINER_NAME}`);
+    await exec(`docker logs ${CONTAINER_NAME}`);
     return true;
   } catch (e) {
     return false;
   }
 }
 
-export function createContainer() {
-  execSync(
+export async function createContainer() {
+  await exec(
     `docker run -d -p ${PORT}:${PORT} --name ${CONTAINER_NAME} ${IMAGE_NAME}`
   );
 }
 
-export function deleteContainer() {
-  execSync(`docker stop ${CONTAINER_NAME}; docker rm ${CONTAINER_NAME}`);
+export async function deleteContainer() {
+  await exec(`docker stop ${CONTAINER_NAME}; docker rm ${CONTAINER_NAME}`);
 }
 
 export async function waitForServer() {
-  while (true) {
+  let attempts = 0;
+  while (attempts < 10) {
     try {
-      const logs = execSync(`docker logs ${CONTAINER_NAME}`).toString();
+      const { stdout: logs } = await exec(`docker logs ${CONTAINER_NAME}`);
       if (logs.includes(`Server running on port ${PORT}`)) {
-        break;
+        return;
       }
-    } catch (e) {
-      console.error(e);
-    }
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      attempts++;
+    } catch (e) {}
   }
+  throw new Error('Server did not start in time');
 }
