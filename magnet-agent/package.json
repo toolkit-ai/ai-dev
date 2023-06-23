@@ -22,7 +22,10 @@
     "README.md",
     "LICENSE"
   ],
-  "bin": "./dist/cli/index.js",
+  "bin": {
+    "magnet-agent": "./dist/cli/index.js",
+    "magnet-agent-server": "./dist/cli/agentServer.js"
+  },
   "scripts": {
     "format": "prettier --check .",
     "clean": "rm -rf dist",
