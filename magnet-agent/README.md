@@ -19,13 +19,23 @@ npm install magnet-agent
 You can run Magnet Agent with our CLI by calling:
 
 ```bash
+npx magnet-agent
+```
+
+Then, you'll be prompted to enter a folder, task description, and output file. The agent will run the task on the folder and output the results to the file.
+
+You can also run Magnet Agent non-interactively with the following command:
+
+```bash
 OPENAI_API_KEY=your_openai_api_key_here npx magnet-agent -f ./ -t "Your task here." -o ./output
 ```
 
 - `-f` is the path to the folder you want to run the task on.
 - `-t` is the task description.
+- `-tf` is a file that contains a task description.
 - `-o` is the path to the file where the agent will output the results.
-- `-c` will prompt the agent to clarify the task description before implementing.
+- `-c` will prompt the agent to interactively clarify the task description before implementing.
+- `-r` will cause the Docker image and container to be rebuilt before running the task.
 
 You'll need to have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running on your machine.
 
@@ -96,12 +106,12 @@ import {createImage, createContainer, waitForContainer} from 'magnet-agent/conta
 
 (async function runAgent() {
   // Boot the Docker container.
-  createImage();
-  createContainer();
+  await createImage();
+  await createContainer();
   await waitForContainer();
 
   // Connect to a local Docker daemon.
-  const host = new AgentHost(HOST, PORT, modelName, openAIApiKey);
+  const host = new Host(HOST, PORT, modelName, openAIApiKey);
 
   // Upload the folder to the local Docker daemon for use in coding projects by agents.
   await host.uploadDirectory(folderName, folder);

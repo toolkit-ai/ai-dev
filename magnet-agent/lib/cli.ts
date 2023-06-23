@@ -19,7 +19,6 @@ import { Host } from './host/Host';
 import { HOST, PORT } from './defaultAgentServerConfig';
 import { readFile, writeFile } from 'fs/promises';
 import path from 'path';
-import dotenv from 'dotenv';
 import indentString from 'indent-string';
 import {
   createClarifyingQuestions,
@@ -28,8 +27,7 @@ import {
 import { OpenAI } from 'langchain/llms/openai';
 import { formatAgentResult } from './host/formatAgentResult';
 import { z } from 'zod';
-
-dotenv.config();
+import os from 'os';
 
 const program = new Command();
 program
@@ -50,17 +48,40 @@ const optionSchema = z.object({
   taskDescription: z.string(),
   model: z.string(),
   clarify: z.boolean(),
+  openAIApiKey: z.string(),
 });
+
+const settingsPath = path.join(os.homedir(), '.magnetrc.json');
+
+const settingsSchema = z.object({
+  openAIApiKey: z.string(),
+});
+
+async function writeSettings(settings: z.infer<typeof settingsSchema>) {
+  await writeFile(settingsPath, JSON.stringify(settings, null, 2));
+}
+
+async function readSettings(): Promise<z.infer<typeof settingsSchema> | null> {
+  try {
+    const settings = JSON.parse(
+      await readFile(settingsPath, { encoding: 'utf-8' })
+    );
+    return settingsSchema.parse(settings);
+  } catch (e) {
+    return null;
+  }
+}
 
 async function runAsyncTask() {
   const externalOptions = program.parse(process.argv).opts();
-  console.log();
+  const settings = await readSettings();
 
   prompts.override({
     ...externalOptions,
     taskDescription: externalOptions['taskfile']
       ? await readFile(path.resolve(externalOptions['taskfile']), 'utf-8')
       : externalOptions['task'],
+    openAIApiKey: process.env['OPENAI_API_KEY'] || settings?.openAIApiKey,
   });
 
   const options = await prompts([
@@ -102,9 +123,23 @@ async function runAsyncTask() {
       active: 'yes',
       inactive: 'no',
     },
+    {
+      type: 'password',
+      name: 'openAIApiKey',
+      message:
+        "Paste your OpenAI API key (we'll save this in ~/.magnetrc.json):",
+      validate: (value: string) => (value ? true : 'This field is required'),
+    },
   ]);
 
   optionSchema.parse(options);
+
+  if (
+    !process.env['OPENAI_API_KEY'] &&
+    settings?.openAIApiKey !== options.openAIApiKey
+  ) {
+    await writeSettings({ openAIApiKey: options.openAIApiKey });
+  }
 
   const { rebuild } = externalOptions;
   const {
@@ -113,15 +148,8 @@ async function runAsyncTask() {
     taskDescription,
     clarify,
     model: modelName,
+    openAIApiKey,
   } = options;
-
-  const openAIApiKey = process.env['OPENAI_API_KEY'];
-  if (!openAIApiKey) {
-    console.error(
-      'No OPENAI_API_KEY found in environment. Set it in your shell environment by passing `OPENAI_API_KEY=[key] npx magnet-agent...`'
-    );
-    process.exit(1);
-  }
 
   if (!(await isDockerDesktopInstalled())) {
     console.error(
