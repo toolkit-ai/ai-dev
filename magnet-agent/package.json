@@ -1,6 +1,6 @@
 {
   "name": "magnet-agent",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Contains the agent and its tools run inside a container.",
   "keywords": [
     "ai",
