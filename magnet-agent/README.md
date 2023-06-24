@@ -67,8 +67,10 @@ import {
   FileInsertTextTool,
   FileReplaceLinesTool,
   FileDeletionTool,
-} from '@magnet-agent/agent';
-import { HOST, PORT } from './config';
+} from 'magnet-agent/agent';
+
+const PORT = 8080;
+const HOST = 'localhost';
 
 // Add tools to the agent server
 const server = createAgentServer({
@@ -101,7 +103,7 @@ server.listen({ port: PORT, host: HOST }, (err) => {
 Then, you can use the Magnet Agent API to boot your container, and run tasks on it:
 
 ```ts
-import {Host} = from '@magnet-agent';
+import {Host} = from 'magnet-agent';
 import {createImage, createContainer, waitForContainer} from 'magnet-agent/containers/local';
 
 (async function runAgent() {
