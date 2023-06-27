@@ -13,7 +13,13 @@ export type AgentActionMessage = {
 
 export type AgentErrorMessage = { type: 'error'; error: string };
 
-export type AgentCompleteMessage = { type: 'complete'; result: ChainValues };
+export type AgentCompleteMessage = {
+  type: 'complete';
+  result: {
+    chain: ChainValues;
+    diff: string;
+  };
+};
 
 export type AgentMessage =
   | AgentRequestMessage

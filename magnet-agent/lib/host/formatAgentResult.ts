@@ -1,11 +1,14 @@
+import indentString from 'indent-string';
+
 import type { AgentResult } from '../agent/AgentResult';
 
 export function formatAgentResult(result: AgentResult): string {
+  const { chain } = result;
   const task =
-    result.intermediateSteps[0]?.action?.log?.split('\n')[0]?.substring(10) ||
+    chain.intermediateSteps[0]?.action?.log?.split('\n')[0]?.substring(10) ||
     'Unknown Task';
 
-  const steps = result.intermediateSteps
+  const steps = chain.intermediateSteps
     .map(
       (step, index) => `### Step ${index + 1}: ${step.action.tool}
   
@@ -27,6 +30,12 @@ export function formatAgentResult(result: AgentResult): string {
   ## Output
   
   \`\`\`json
-  ${JSON.stringify(result.output, null, 2)}
+  ${JSON.stringify(chain.output, null, 2)}
+  \`\`\`
+
+  ## Changed Files
+
+  \`\`\`diff
+${indentString(result.diff, 2)}
   \`\`\``;
 }

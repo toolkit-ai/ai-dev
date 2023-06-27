@@ -14,6 +14,11 @@ import { AgentModel } from './AgentModel';
 import type { AgentRepos } from './AgentRepos';
 import { AgentCallbackHandler } from './AgentCallbackHandler';
 import { CallbackManager } from 'langchain/callbacks';
+import { StructuredOutputParser } from 'langchain/output_parsers';
+import { z } from 'zod';
+import { PromptTemplate } from 'langchain';
+import { readFile, readdir } from 'fs/promises';
+import path from 'path';
 
 export class Agent {
   repos: AgentRepos;
@@ -54,33 +59,74 @@ export class Agent {
     }
 
     const { repoName, taskDescription } = message;
-    const workspaceDir = await this.repos.cloneRepo(repoName);
+    const workspaceDir = await this.repos.createWorkspace(repoName);
+    const [executor, files] = await Promise.all([
+      initializeAgentExecutorWithOptions(
+        this.tools,
+        new AgentModel({ sendRequest: (...args) => this.sendRequest(...args) }),
+        {
+          agentType: 'structured-chat-zero-shot-react-description',
+          returnIntermediateSteps: true,
+          verbose: true,
+        }
+      ),
+      readdir(workspaceDir),
+    ]);
+    this.executor = executor;
 
-    this.executor = await initializeAgentExecutorWithOptions(
-      this.tools,
-      new AgentModel({ sendRequest: (...args) => this.sendRequest(...args) }),
-      {
-        agentType: 'structured-chat-zero-shot-react-description',
-        returnIntermediateSteps: true,
-        verbose: true,
-      }
-    );
+    // Fetch common readme files using fs
+    const readmePath = files.filter((file) =>
+      ['README.md', 'README.txt', 'README'].includes(file)
+    )[0];
+    const readme = readmePath
+      ? await readFile(path.join(workspaceDir, readmePath), 'utf-8')
+      : null;
 
     const callbacks = new CallbackManager();
     callbacks.addHandler(
       new AgentCallbackHandler((...args) => this.sendMessage(...args))
     );
 
+    const parser = StructuredOutputParser.fromZodSchema(
+      z.object({
+        explanation: z
+          .string()
+          .describe(
+            'A description of the code change made, an answer to the question in the task, or explanation of why the agent gave up.'
+          ),
+      })
+    );
+    const formatInstructions = parser.getFormatInstructions();
+    const prompt = new PromptTemplate({
+      template:
+        "You're an expert engineer. The codebase you're working with is located in the {workspace_dir} directory. I'm product manager and need you to implement this task: '{task_description}'. Here's a listing of the first 50 files in the {workspace_dir} directory: {files}. Explore the codebase, and based on what you understand, complete the task. {readme} \n{format_instructions}",
+      inputVariables: ['task_description', 'workspace_dir', 'files', 'readme'],
+      partialVariables: { format_instructions: formatInstructions },
+    });
+
+    const input = await prompt.format({
+      task_description: taskDescription,
+      workspace_dir: workspaceDir,
+      files: JSON.stringify(files.slice(0, 50)),
+      readme: readme
+        ? `Here's an excerpt of the README:\n"""\n${readme.slice(
+            0,
+            1000
+          )}\n"""\n`
+        : '',
+    });
+
+    console.log('input', input);
+
     try {
-      const result = await this.executor.call(
-        {
-          input: `You're a coding assistant. The codebase you're working with is located in the ${workspaceDir} directory so do your work in the context of to that path. I need your help with: ${taskDescription}. When you're finished return the following data in this format type result = { filesChanged: string[], commitMessage: string }`,
-        },
-        callbacks
-      );
+      const chain = await this.executor.call({ input }, callbacks);
+      const diff = await this.repos.getWorkspaceDiff(workspaceDir);
       this.sendMessage({
         type: 'complete',
-        result,
+        result: {
+          chain,
+          diff,
+        },
       });
     } catch (error) {
       this.sendMessage({
