@@ -55,6 +55,7 @@
     "indent-string": "^4.0.0",
     "kleur": "^4.1.5",
     "langchain": "^0.0.92",
+    "posthog-node": "^3.1.1",
     "prompts": "^2.4.2",
     "uuid": "^9.0.0",
     "walkdir": "^0.4.1",
