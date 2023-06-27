@@ -1,6 +1,9 @@
 import type { AgentStep } from 'langchain/schema';
 
 export interface AgentResult {
-  output: string;
-  intermediateSteps: AgentStep[];
+  chain: {
+    output: string;
+    intermediateSteps: AgentStep[];
+  };
+  diff: string;
 }

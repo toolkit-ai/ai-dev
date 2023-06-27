@@ -243,7 +243,7 @@ async function runAsyncTask() {
       kleur.green().bold('Complete! Output written to: ') + `${outfile} ✅`
     );
   } catch (e) {
-    logAgent(kleur.red().bold('Error!') + '\n\n' + indentString(e as any, 2));
+    logAgent(kleur.red().bold('Error!') + '\n\n' + indentString(String(e), 2));
   }
 }
 
