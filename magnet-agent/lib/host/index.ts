@@ -1,4 +1,5 @@
 export { Host } from './Host';
+export * from './HostTaskClarification';
 
 export { createDirectorySource } from './createDirectorySource';
 
