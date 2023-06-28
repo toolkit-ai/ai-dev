@@ -1,5 +1,6 @@
 import { exec as execCallback } from 'child_process';
 import { promisify } from 'util';
+
 import { version } from '../version';
 
 const exec = promisify(execCallback);
@@ -39,7 +40,9 @@ export async function waitForDockerDesktop() {
     if (await isDockerDesktopRunning()) {
       return;
     }
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await new Promise((resolve) => {
+      setTimeout(resolve, 3000);
+    });
     attempts++;
   }
   throw new Error('Docker Desktop did not start in time.');
@@ -55,7 +58,7 @@ export async function imageExists() {
 }
 
 export async function createImage(contextPath: string, dockerfilePath: string) {
-  return await exec(
+  return exec(
     `cd ${contextPath}; docker build -t ${IMAGE_NAME} -f ${dockerfilePath} .`
   );
 }
@@ -87,8 +90,11 @@ export async function waitForServer(port: number) {
       if (logs.includes(`Server running on port ${port}`)) {
         return;
       }
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await new Promise((resolve) => {
+        setTimeout(resolve, 3000);
+      });
       attempts++;
+      // eslint-disable-next-line no-empty
     } catch (e) {}
   }
   throw new Error('Server did not start in time');

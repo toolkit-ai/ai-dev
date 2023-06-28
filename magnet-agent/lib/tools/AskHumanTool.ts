@@ -20,7 +20,7 @@ class AskHumanTool extends AgentStructuredTool<typeof AskHumanSchema> {
 
   // Implement the protected abstract method
   protected async _call(arg: AskHumanType): Promise<string> {
-    return await this.context.sendRequest({
+    return this.context.sendRequest({
       type: 'ask_human',
       question: arg.question,
     });

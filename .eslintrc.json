@@ -8,6 +8,9 @@
     "class-methods-use-this": "off",
     "no-console": "off",
     "no-underscore-dangle": "off",
+    "no-restricted-syntax": "off",
+    "no-await-in-loop": "off",
+    "no-plusplus": "off",
     "import/prefer-default-export": "off",
     "import/order": [
       "error",
