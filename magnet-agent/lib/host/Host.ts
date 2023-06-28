@@ -28,13 +28,15 @@ export class Host {
   startTask(
     repoName: string,
     taskDescription: string,
-    model: BaseLLM
+    model: BaseLLM,
+    handleAskHuman: (question: string) => Promise<string>
   ): HostTask {
     return new HostTask(
       `ws://${this.hostname}:${this.port}/agent`,
       repoName,
       taskDescription,
-      model
+      model,
+      handleAskHuman
     );
   }
 }

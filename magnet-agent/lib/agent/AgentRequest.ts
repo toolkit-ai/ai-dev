@@ -8,8 +8,17 @@ export type AgentModelRequest = {
   options: AgentModel['ParsedCallOptions'];
 };
 
-export type AgentRequest = AgentModelRequest;
+export type AgentAskHumanRequest = {
+  type: 'ask_human';
+  question: string;
+};
+
+export type AgentRequest = AgentModelRequest | AgentAskHumanRequest;
 
 export type AgentRequestModelResponse = LLMResult;
 
-export type AgentRequestResponse = AgentRequestModelResponse;
+export type AgentRequestAskHumanResponse = string;
+
+export type AgentRequestResponse =
+  | AgentRequestModelResponse
+  | AgentRequestAskHumanResponse;
