@@ -1,3 +1,9 @@
+import type { AgentRequestResponse } from '../agent/AgentRequest';
+
+export type HostModelResponse = string[];
+
+export type HostResponse = HostModelResponse;
+
 export type HostStartMessage = {
   type: 'start';
   repoName: string;
@@ -7,7 +13,7 @@ export type HostStartMessage = {
 export type HostResponseMessage = {
   type: 'response';
   requestId: string;
-  response?: any;
+  response?: AgentRequestResponse;
   error?: string;
 };
 

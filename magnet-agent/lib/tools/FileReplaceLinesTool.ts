@@ -1,20 +1,20 @@
 import { promises as fs } from 'fs';
 
-import { StructuredTool } from 'langchain/tools';
 import { z } from 'zod';
+import { AgentStructuredTool } from '../agent/AgentStructuredTool';
 
 // Define the Zod schema for the input
 const FileReplaceLinesSchema = z.object({
-  path: z.string().optional(),
-  startLine: z.number().optional(),
-  endLine: z.number().optional(),
-  newText: z.string().optional(),
+  path: z.string(),
+  startLine: z.number(),
+  endLine: z.number(),
+  newText: z.string(),
 });
 
 type FileReplaceLinesType = z.infer<typeof FileReplaceLinesSchema>;
 
 // Define the tool
-class FileReplaceLinesTool extends StructuredTool<
+class FileReplaceLinesTool extends AgentStructuredTool<
   typeof FileReplaceLinesSchema
 > {
   // Implement the required properties
@@ -27,9 +27,6 @@ class FileReplaceLinesTool extends StructuredTool<
   // Implement the protected abstract method
   protected async _call(arg: FileReplaceLinesType): Promise<string> {
     const { path, startLine, endLine, newText } = arg;
-    if (!path || startLine === undefined || endLine === undefined || !newText) {
-      return `No path, startLine, endLine, or newText provided. Make sure to follow the JSON schema for this tool.`;
-    }
 
     try {
       const data = await fs.readFile(path, 'utf-8');

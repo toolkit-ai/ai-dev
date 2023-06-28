@@ -2,7 +2,6 @@ import {
   AgentExecutor,
   initializeAgentExecutorWithOptions,
 } from 'langchain/agents';
-import type { StructuredTool } from 'langchain/tools';
 import { v4 as uuid } from 'uuid';
 import type { AgentMessage } from './AgentMessage';
 import type {
@@ -19,10 +18,13 @@ import { z } from 'zod';
 import { PromptTemplate } from 'langchain';
 import { readFile, readdir } from 'fs/promises';
 import path from 'path';
+import type { AgentStructuredTool } from './AgentStructuredTool';
+import type { AgentContext } from './AgentContext';
+import type { AgentRequest, AgentRequestResponse } from './AgentRequest';
 
 export class Agent {
   repos: AgentRepos;
-  tools: StructuredTool[];
+  tools: (typeof AgentStructuredTool<any>)[];
   executor: AgentExecutor | null = null;
   sendMessage: (message: AgentMessage) => void;
   requests: {
@@ -33,7 +35,7 @@ export class Agent {
   } = {};
 
   constructor(
-    tools: StructuredTool[],
+    tools: (typeof AgentStructuredTool<any>)[],
     repos: AgentRepos,
     sendMessage: (message: AgentMessage) => void
   ) {
@@ -60,21 +62,21 @@ export class Agent {
 
     const { repoName, taskDescription } = message;
     const workspaceDir = await this.repos.createWorkspace(repoName);
+    const context: AgentContext = {
+      sendRequest: (request) => this.sendRequest(request),
+    };
+    const tools = this.tools.map((tool) => new (tool as any)(context));
+
     const [executor, files] = await Promise.all([
-      initializeAgentExecutorWithOptions(
-        this.tools,
-        new AgentModel({ sendRequest: (...args) => this.sendRequest(...args) }),
-        {
-          agentType: 'structured-chat-zero-shot-react-description',
-          returnIntermediateSteps: true,
-          verbose: true,
-        }
-      ),
+      initializeAgentExecutorWithOptions(tools, new AgentModel({ context }), {
+        agentType: 'structured-chat-zero-shot-react-description',
+        returnIntermediateSteps: true,
+        verbose: true,
+      }),
       readdir(workspaceDir),
     ]);
     this.executor = executor;
 
-    // Fetch common readme files using fs
     const readmePath = files.filter((file) =>
       ['README.md', 'README.txt', 'README'].includes(file)
     )[0];
@@ -149,9 +151,10 @@ export class Agent {
     request.resolve(response);
   }
 
-  private sendRequest<TRequest, TResponse>(
-    request: TRequest
-  ): Promise<TResponse> {
+  private sendRequest<
+    TRequest extends AgentRequest,
+    TResponse extends AgentRequestResponse
+  >(request: TRequest): Promise<TResponse> {
     const requestId = uuid();
     const promise: Promise<TResponse> = new Promise((resolve, reject) => {
       this.requests[requestId] = {
@@ -159,6 +162,7 @@ export class Agent {
         reject,
       };
     });
+    console.log(request);
     this.sendMessage({
       type: 'request',
       requestId,

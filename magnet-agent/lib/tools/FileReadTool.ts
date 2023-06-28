@@ -1,18 +1,17 @@
 import { promises as fs } from 'fs';
 
-import { StructuredTool } from 'langchain/tools';
 import { z } from 'zod';
+import { AgentStructuredTool } from '../agent/AgentStructuredTool';
 
 // Define the Zod schema for the input
 const FilePathSchema = z.object({
-  path: z.string().optional(),
+  path: z.string(),
 });
-// TODO add a linter to ensure all paths are optional and add a npm script to run the linter
 
 type FilePathType = z.infer<typeof FilePathSchema>;
 
 // Define the tool
-class FileReadTool extends StructuredTool<typeof FilePathSchema> {
+class FileReadTool extends AgentStructuredTool<typeof FilePathSchema> {
   // Implement the required properties
   name = 'FileReadTool';
 
@@ -23,9 +22,6 @@ class FileReadTool extends StructuredTool<typeof FilePathSchema> {
   // Implement the protected abstract method
   protected async _call(arg: FilePathType): Promise<string> {
     const { path } = arg;
-    if (!path) {
-      return `No path provided. Make sure to follow the JSON schema for this tool.`;
-    }
 
     console.log(`Reading file at ${path}`);
     try {

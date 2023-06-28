@@ -1,18 +1,18 @@
 import { promises as fs } from 'fs';
 
-import { StructuredTool } from 'langchain/tools';
 import { z } from 'zod';
+import { AgentStructuredTool } from '../agent/AgentStructuredTool';
 
 // Define the Zod schema for the input
 const FileCreationSchema = z.object({
-  path: z.string().optional(),
-  content: z.string().optional(),
+  path: z.string(),
+  content: z.string(),
 });
 
 type FileCreationType = z.infer<typeof FileCreationSchema>;
 
 // Define the tool
-class FileCreationTool extends StructuredTool<typeof FileCreationSchema> {
+class FileCreationTool extends AgentStructuredTool<typeof FileCreationSchema> {
   // Implement the required properties
   name = 'FileCreationTool';
 
@@ -24,9 +24,7 @@ class FileCreationTool extends StructuredTool<typeof FileCreationSchema> {
   protected async _call(arg: FileCreationType): Promise<string> {
     const { path } = arg;
     const content = arg.content || ''; // If no content provided, create an empty file
-    if (!path) {
-      return `No path provided. Make sure to follow the JSON schema for this tool.`;
-    }
+
     try {
       await fs.writeFile(path, content);
       return `File created at ${path}`;

@@ -70,15 +70,24 @@ export class HostTask extends EventEmitter {
   }
 
   private async handleRequestMessage(message: AgentRequestMessage) {
-    const result = await this.model._generate(
-      message.request.prompts,
-      message.request.options
-    );
-    this.sendMessage({
-      type: 'response',
-      requestId: message.requestId,
-      response: result,
-    });
+    switch (message.request.type) {
+      case 'model': {
+        const result = await this.model._generate(
+          message.request.prompts,
+          message.request.options
+        );
+        this.sendMessage({
+          type: 'response',
+          requestId: message.requestId,
+          response: result,
+        });
+        break;
+      }
+      default:
+        throw new Error(
+          `Unknown request type: ${(message.request as any).type}`
+        );
+    }
   }
 
   private async handleActionMessage(message: AgentActionMessage) {

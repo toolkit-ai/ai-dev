@@ -2,19 +2,19 @@ import { promises as fs, createReadStream } from 'fs';
 import { join } from 'path';
 import readline from 'readline';
 
-import { StructuredTool } from 'langchain/tools';
 import { z } from 'zod';
+import { AgentStructuredTool } from '../agent/AgentStructuredTool';
 
 // Define the Zod schema for the input
 const SearchSchema = z.object({
-  directory: z.string().optional(),
-  searchString: z.string().optional(),
+  directory: z.string(),
+  searchString: z.string(),
 });
 
 type SearchType = z.infer<typeof SearchSchema>;
 
 // Define the tool
-class SearchTool extends StructuredTool<typeof SearchSchema> {
+class SearchTool extends AgentStructuredTool<typeof SearchSchema> {
   // Implement the required properties
   name = 'SearchTool';
 
@@ -26,9 +26,6 @@ class SearchTool extends StructuredTool<typeof SearchSchema> {
   // Implement the protected abstract method
   protected async _call(arg: SearchType): Promise<string> {
     const { searchString, directory } = arg;
-    if (!searchString || !directory) {
-      return `No search string or directory provided. Make sure to follow the JSON schema for this tool.`;
-    }
 
     let result = '';
     try {
