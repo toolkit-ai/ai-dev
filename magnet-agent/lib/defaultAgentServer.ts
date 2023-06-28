@@ -15,14 +15,14 @@ import { HOST, PORT } from './defaultAgentServerConfig';
 
 const server = createAgentServer({
   tools: [
-    new FileReadTool(),
-    new DirectoryReadTool(),
-    new SearchTool(),
-    new FileCreationTool(),
-    new FileDeleteLinesTool(),
-    new FileInsertTextTool(),
-    new FileReplaceLinesTool(),
-    new FileDeletionTool(),
+    FileReadTool,
+    DirectoryReadTool,
+    SearchTool,
+    FileCreationTool,
+    FileDeleteLinesTool,
+    FileInsertTextTool,
+    FileReplaceLinesTool,
+    FileDeletionTool,
   ],
 });
 

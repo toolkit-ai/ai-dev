@@ -1,9 +1,11 @@
 import type { AgentAction, ChainValues } from 'langchain/schema';
 
+import type { AgentRequest } from './AgentRequest';
+
 export type AgentRequestMessage = {
   type: 'request';
   requestId: string;
-  request: any;
+  request: AgentRequest;
 };
 
 export type AgentActionMessage = {

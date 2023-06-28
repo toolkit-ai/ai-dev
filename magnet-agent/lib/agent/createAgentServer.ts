@@ -1,12 +1,12 @@
 import fastify from 'fastify';
 import { Agent } from './Agent';
-import type { StructuredTool } from 'langchain/tools';
 import fastifyWebsocketPlugin from '@fastify/websocket';
 import fastifyMulitpartPlugin from '@fastify/multipart';
 import { AgentRepos } from './AgentRepos';
+import type { AgentStructuredTool } from './AgentStructuredTool';
 
 export type ServerConfig = {
-  tools: StructuredTool[];
+  tools: (typeof AgentStructuredTool<any>)[];
 };
 
 export function createAgentServer(config: ServerConfig) {

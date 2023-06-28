@@ -1,19 +1,21 @@
 import { promises as fs } from 'fs';
 
-import { StructuredTool } from 'langchain/tools';
 import { z } from 'zod';
+import { AgentStructuredTool } from '../agent/AgentStructuredTool';
 
 // Define the Zod schema for the input
 const FileInsertTextSchema = z.object({
-  path: z.string().optional(),
-  lineNumber: z.number().optional(),
-  text: z.string().optional(),
+  path: z.string(),
+  lineNumber: z.number(),
+  text: z.string(),
 });
 
 type FileInsertTextType = z.infer<typeof FileInsertTextSchema>;
 
 // Define the tool
-class FileInsertTextTool extends StructuredTool<typeof FileInsertTextSchema> {
+class FileInsertTextTool extends AgentStructuredTool<
+  typeof FileInsertTextSchema
+> {
   // Implement the required properties
   name = 'FileInsertTextTool';
 
@@ -24,9 +26,6 @@ class FileInsertTextTool extends StructuredTool<typeof FileInsertTextSchema> {
   // Implement the protected abstract method
   protected async _call(arg: FileInsertTextType): Promise<string> {
     const { path, lineNumber, text } = arg;
-    if (!path || lineNumber === undefined || !text) {
-      return `No path, line number, or text provided. Make sure to follow the JSON schema for this tool.`;
-    }
 
     try {
       const data = await fs.readFile(path, 'utf-8');

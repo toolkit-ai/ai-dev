@@ -1,17 +1,20 @@
 import { promises as fs } from 'fs';
 
-import { StructuredTool } from 'langchain/tools';
 import { z } from 'zod';
+
+import { AgentStructuredTool } from '../agent/AgentStructuredTool';
 
 // Define the Zod schema for the input
 const DirectoryPathSchema = z.object({
-  path: z.string().optional(),
+  path: z.string(),
 });
 
 type DirectoryPathType = z.infer<typeof DirectoryPathSchema>;
 
 // Define the tool
-class DirectoryReadTool extends StructuredTool<typeof DirectoryPathSchema> {
+class DirectoryReadTool extends AgentStructuredTool<
+  typeof DirectoryPathSchema
+> {
   // Implement the required properties
   name = 'DirectoryReadTool';
 
@@ -21,11 +24,7 @@ class DirectoryReadTool extends StructuredTool<typeof DirectoryPathSchema> {
 
   // Implement the protected abstract method
   protected async _call(arg: DirectoryPathType): Promise<string> {
-    const { path } = arg; // Use provided path or current working directory
-    if (!path) {
-      return `No path provided. Make sure to follow the JSON schema for this tool.`;
-    }
-
+    const { path } = arg;
     try {
       const files = await fs.readdir(path);
       return files.join(', ');

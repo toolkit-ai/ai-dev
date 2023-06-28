@@ -1,17 +1,17 @@
 import { promises as fs } from 'fs';
 
-import { StructuredTool } from 'langchain/tools';
 import { z } from 'zod';
+import { AgentStructuredTool } from '../agent/AgentStructuredTool';
 
 // Define the Zod schema for the input
 const FileDeletionSchema = z.object({
-  path: z.string().optional(),
+  path: z.string(),
 });
 
 type FileDeletionType = z.infer<typeof FileDeletionSchema>;
 
 // Define the tool
-class FileDeletionTool extends StructuredTool<typeof FileDeletionSchema> {
+class FileDeletionTool extends AgentStructuredTool<typeof FileDeletionSchema> {
   // Implement the required properties
   name = 'FileDeletionTool';
 
@@ -22,9 +22,6 @@ class FileDeletionTool extends StructuredTool<typeof FileDeletionSchema> {
   // Implement the protected abstract method
   protected async _call(arg: FileDeletionType): Promise<string> {
     const { path } = arg;
-    if (!path) {
-      return `No path provided. Make sure to follow the JSON schema for this tool.`;
-    }
 
     try {
       await fs.unlink(path);

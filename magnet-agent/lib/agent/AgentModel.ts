@@ -2,23 +2,19 @@ import type { CallbackManagerForLLMRun } from 'langchain/callbacks';
 import { BaseLLM, type BaseLLMParams } from 'langchain/llms/base';
 import type { LLMResult } from 'langchain/schema';
 
-export type AgentModelRequest = {
-  prompts: string[];
-  options: AgentModel['ParsedCallOptions'];
-};
-
-export type AgentModelResponse = LLMResult;
+import type { AgentContext } from './AgentContext';
+import type { AgentRequestModelResponse } from './AgentRequest';
 
 export class AgentModel extends BaseLLM {
-  sendRequest: (request: AgentModelRequest) => Promise<AgentModelResponse>;
+  context: AgentContext;
 
   constructor(
     fields: BaseLLMParams & {
-      sendRequest: (request: AgentModelRequest) => Promise<AgentModelResponse>;
+      context: AgentContext;
     }
   ) {
     super(fields);
-    this.sendRequest = fields.sendRequest;
+    this.context = fields.context;
   }
 
   override async _generate(
@@ -27,7 +23,8 @@ export class AgentModel extends BaseLLM {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _?: CallbackManagerForLLMRun | undefined
   ): Promise<LLMResult> {
-    return this.sendRequest({
+    return this.context.sendRequest<AgentRequestModelResponse>({
+      type: 'model',
       prompts,
       options,
     });

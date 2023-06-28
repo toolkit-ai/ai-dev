@@ -30,6 +30,7 @@ import { z } from 'zod';
 import os from 'os';
 import { applyAgentResult } from './host/result/applyAgentResult';
 import { sendAgentResultFeedback } from './host/result/sendAgentResultFeedback';
+import { formatAgentResultOutput } from './host/result/formatAgentResultOutput';
 
 const program = new Command();
 program
@@ -246,7 +247,9 @@ async function runAsyncTask() {
   try {
     const result = await session.getResult();
     await writeFile(path.resolve(outfile), formatAgentResult(result));
-    logAgent(kleur.green().bold('Complete! ') + result.chain.output);
+    logAgent(
+      kleur.green().bold('Complete! ') + formatAgentResultOutput(result)
+    );
     logAgent(kleur.green().bold('Output written to: ') + `${outfile} ✅`);
 
     const { feedback } = externalOptions['no-feedback']
