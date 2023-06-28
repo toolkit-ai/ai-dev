@@ -1,6 +1,6 @@
 import indentString from 'indent-string';
 
-import type { AgentResult } from '../agent/AgentResult';
+import type { AgentResult } from '../../agent/AgentResult';
 
 export function formatAgentResult(result: AgentResult): string {
   const { chain } = result;

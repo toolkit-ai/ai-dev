@@ -25,9 +25,11 @@ import {
   createClarifiedTaskDescription,
 } from './host/HostTaskClarification';
 import { OpenAI } from 'langchain/llms/openai';
-import { formatAgentResult } from './host/formatAgentResult';
+import { formatAgentResult } from './host/result/formatAgentResult';
 import { z } from 'zod';
 import os from 'os';
+import { applyAgentResult } from './host/result/applyAgentResult';
+import { sendAgentResultFeedback } from './host/result/sendAgentResultFeedback';
 
 const program = new Command();
 program
@@ -40,7 +42,9 @@ program
   .option('-tf, --taskfile <taskfile>', 'Specify the task as an input file')
   .option('-m, --model <model>', 'Specify the OpenAI model to use')
   .option('-r, --rebuild', 'Rebuild the image and container before running')
-  .option('-c, --clarify', 'Clarify the task description before running');
+  .option('-c, --clarify', 'Clarify the task description before running')
+  .option('-a, --apply', 'Apply the task description before running')
+  .option('-n, --no-feedback', 'Do not ask about feedback on the agent');
 
 const optionSchema = z.object({
   folder: z.string(),
@@ -77,10 +81,13 @@ async function runAsyncTask() {
   const settings = await readSettings();
 
   prompts.override({
-    ...externalOptions,
+    folder: externalOptions['folder'],
     taskDescription: externalOptions['taskfile']
       ? await readFile(path.resolve(externalOptions['taskfile']), 'utf-8')
       : externalOptions['task'],
+    outfile: externalOptions['outfile'],
+    model: externalOptions['model'],
+    clarify: externalOptions['clarify'],
     openAIApiKey: process.env['OPENAI_API_KEY'] || settings?.openAIApiKey,
   });
 
@@ -111,7 +118,7 @@ async function runAsyncTask() {
       message: 'Specify the OpenAI model to use:',
       initial: 0,
       choices: [
-        { title: 'GPT-3 Turbo', value: 'gpt-3-turbo' },
+        { title: 'GPT-3.5 Turbo', value: 'gpt-3.5-turbo' },
         { title: 'GPT-4', value: 'gpt-4' },
       ],
     },
@@ -196,12 +203,12 @@ async function runAsyncTask() {
     const questions = await createClarifyingQuestions(taskDescription, model);
     let clarifications: [string, string][] = [];
     for (const question of questions) {
-      const answer = await prompts.prompt({
+      const { answer } = await prompts.prompt({
         type: 'text',
-        name: 'question',
+        name: 'answer',
         message: question,
       });
-      clarifications.push([question, answer as string]);
+      clarifications.push([question, answer]);
     }
 
     clarifiedTaskDescription = await createClarifiedTaskDescription(
@@ -239,11 +246,68 @@ async function runAsyncTask() {
   try {
     const result = await session.getResult();
     await writeFile(path.resolve(outfile), formatAgentResult(result));
-    logAgent(
-      kleur.green().bold('Complete! Output written to: ') + `${outfile} ✅`
-    );
+    logAgent(kleur.green().bold('Complete! ') + result.chain.output);
+    logAgent(kleur.green().bold('Output written to: ') + `${outfile} ✅`);
+
+    const { feedback } = externalOptions['no-feedback']
+      ? { feedback: 'skip' }
+      : await prompts.prompt({
+          type: 'select',
+          name: 'feedback',
+          message:
+            'Did the agent do a good job? (Sends feedback to Toolkit AI)',
+          initial: 0,
+          choices: [
+            { title: 'Yes', value: 'positive' },
+            { title: 'No', value: 'negative' },
+            { title: 'Skip', value: 'skip' },
+          ],
+        });
+
+    if (feedback == 'positive') {
+      await sendAgentResultFeedback('positive');
+    }
+
+    if (feedback == 'skip' || feedback == 'positive') {
+      const { apply } = await prompts.prompt({
+        type: 'toggle',
+        name: 'apply',
+        message: 'Apply the changes to local copy?',
+        initial: false,
+        active: 'yes',
+        inactive: 'no',
+      });
+      if (apply) {
+        await applyAgentResult(result, folder);
+      }
+    }
+
+    if (feedback == 'negative') {
+      const { details } = await prompts.prompt({
+        type: 'text',
+        name: 'details',
+        message: 'What went wrong?',
+      });
+      await sendAgentResultFeedback('negative', details as string);
+    }
+    process.exit(0);
   } catch (e) {
     logAgent(kleur.red().bold('Error!') + '\n\n' + indentString(String(e), 2));
+
+    const { send } = externalOptions['no-feedback']
+      ? { send: false }
+      : await prompts.prompt({
+          type: 'toggle',
+          name: 'send',
+          message: 'Send the error to ToolkitAI?',
+          initial: false,
+          active: 'yes',
+          inactive: 'no',
+        });
+    if (send) {
+      await sendAgentResultFeedback('error', e as any);
+    }
+    process.exit(1);
   }
 }
 
