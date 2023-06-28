@@ -8,6 +8,11 @@ export type AgentRequestMessage = {
   request: AgentRequest;
 };
 
+export type AgentUpdateTaskMessage = {
+  type: 'update-task';
+  taskDescription: string;
+};
+
 export type AgentActionMessage = {
   type: 'action';
   action: AgentAction;
@@ -25,6 +30,7 @@ export type AgentCompleteMessage = {
 
 export type AgentMessage =
   | AgentRequestMessage
+  | AgentUpdateTaskMessage
   | AgentActionMessage
   | AgentErrorMessage
   | AgentCompleteMessage;

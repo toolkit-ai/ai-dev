@@ -31,14 +31,16 @@ export class Host {
     repoName: string,
     taskDescription: string,
     model: BaseLLM,
-    handleAskHuman: (question: string) => Promise<string>
+    handleAskHuman: (question: string) => Promise<string>,
+    clarify: boolean = false
   ): HostTask {
     return new HostTask(
       `ws://${this.hostname}:${this.port}/agent`,
       repoName,
       taskDescription,
       model,
-      handleAskHuman
+      handleAskHuman,
+      clarify
     );
   }
 }

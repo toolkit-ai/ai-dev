@@ -23,12 +23,8 @@ import {
   waitForDockerDesktop,
   waitForServer,
 } from './containers/local';
+import { Host } from './host';
 import { HOST, PORT } from './defaultAgentServerConfig';
-import { Host } from './host/Host';
-import {
-  createClarifyingQuestions,
-  createClarifiedTaskDescription,
-} from './host/HostTaskClarification';
 import { applyAgentResult } from './host/result/applyAgentResult';
 import { formatAgentResult } from './host/result/formatAgentResult';
 import { formatAgentResultOutput } from './host/result/formatAgentResultOutput';
@@ -192,7 +188,7 @@ async function runAsyncTask() {
   }
 
   if (!(await imageExists()) || rebuild) {
-    logContainer('Creating image...');
+    logContainer('Creating image! This may take a while the first time...');
     if (await containerExists()) {
       logContainer('Deleting existing container...');
       await deleteContainer();
@@ -217,31 +213,6 @@ async function runAsyncTask() {
 
   const model = new OpenAI({ modelName, openAIApiKey });
 
-  let clarifiedTaskDescription = taskDescription;
-  if (clarify) {
-    logAgent('A few clarifying questions about the task...');
-    const questions = await createClarifyingQuestions(taskDescription, model);
-    const clarifications: [string, string][] = [];
-    for (const question of questions) {
-      const { answer } = await prompts.prompt({
-        type: 'text',
-        name: 'answer',
-        message: question,
-      });
-      clarifications.push([question, answer]);
-    }
-
-    clarifiedTaskDescription = await createClarifiedTaskDescription(
-      taskDescription,
-      clarifications,
-      model
-    );
-    logAgent(
-      kleur.blue().bold('Clarified task description...\n\n') +
-        indentString(clarifiedTaskDescription, 2)
-    );
-  }
-
   logAgent('Running task...');
 
   const host = new Host(HOST, PORT);
@@ -249,11 +220,22 @@ async function runAsyncTask() {
 
   const session = host.startTask(
     folder,
-    clarifiedTaskDescription,
+    taskDescription,
     model,
-    handleAskHuman
+    handleAskHuman,
+    clarify
   );
-  session.on('action', (action) => {
+
+  session.on('update-task', (update: any) => {
+    logAgent(
+      kleur.blue().bold('Task revised by agent...\n\n') +
+        indentString(
+          `${kleur.bold().underline('Task')}: ${update.taskDescription}`
+        )
+    );
+  });
+
+  session.on('action', (action: any) => {
     logAgent(
       kleur.blue().bold('Performed action...\n\n') +
         indentString(
