@@ -1,7 +1,8 @@
-import fastify from 'fastify';
-import { Agent } from './Agent';
-import fastifyWebsocketPlugin from '@fastify/websocket';
 import fastifyMulitpartPlugin from '@fastify/multipart';
+import fastifyWebsocketPlugin from '@fastify/websocket';
+import fastify from 'fastify';
+
+import { Agent } from './Agent';
 import { AgentRepos } from './AgentRepos';
 import type { AgentStructuredTool } from './AgentStructuredTool';
 
@@ -37,8 +38,8 @@ export function createAgentServer(config: ServerConfig) {
     reply.send({ success: true });
   });
 
-  server.register(async (server) => {
-    server.get('/agent', { websocket: true }, async (connection, _) => {
+  server.register(async (srv) => {
+    srv.get('/agent', { websocket: true }, async (connection) => {
       const agent = new Agent(config.tools, repos, (message) => {
         connection.socket.send(JSON.stringify(message));
       });

@@ -1,32 +1,38 @@
+import { readFile, readdir } from 'fs/promises';
+import path from 'path';
+
+import { PromptTemplate } from 'langchain';
 import {
   AgentExecutor,
   initializeAgentExecutorWithOptions,
 } from 'langchain/agents';
+import { CallbackManager } from 'langchain/callbacks';
+import { StructuredOutputParser } from 'langchain/output_parsers';
 import { v4 as uuid } from 'uuid';
+import { z } from 'zod';
+
+import { AgentCallbackHandler } from './AgentCallbackHandler';
+import type { AgentContext } from './AgentContext';
 import type { AgentMessage } from './AgentMessage';
+import { AgentModel } from './AgentModel';
+import type { AgentRepos } from './AgentRepos';
+import type { AgentRequest, AgentRequestResponse } from './AgentRequest';
+import type { AgentStructuredTool } from './AgentStructuredTool';
 import type {
   HostMessage,
   HostResponseMessage,
   HostStartMessage,
 } from '../host/HostMessage';
-import { AgentModel } from './AgentModel';
-import type { AgentRepos } from './AgentRepos';
-import { AgentCallbackHandler } from './AgentCallbackHandler';
-import { CallbackManager } from 'langchain/callbacks';
-import { StructuredOutputParser } from 'langchain/output_parsers';
-import { z } from 'zod';
-import { PromptTemplate } from 'langchain';
-import { readFile, readdir } from 'fs/promises';
-import path from 'path';
-import type { AgentStructuredTool } from './AgentStructuredTool';
-import type { AgentContext } from './AgentContext';
-import type { AgentRequest, AgentRequestResponse } from './AgentRequest';
 
 export class Agent {
   repos: AgentRepos;
+
   tools: (typeof AgentStructuredTool<any>)[];
+
   executor: AgentExecutor | null = null;
+
   sendMessage: (message: AgentMessage) => void;
+
   requests: {
     [requestId: string]: {
       resolve: (result: any) => void;
@@ -52,6 +58,10 @@ export class Agent {
       case 'response':
         this.handleResponseMessage(message);
         break;
+      default:
+        throw new Error(
+          `Unknown message type "${(message as { type: string }).type}"`
+        );
     }
   }
 

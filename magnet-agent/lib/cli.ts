@@ -1,8 +1,16 @@
 #!/usr/bin/env node
 
+import { readFile, writeFile } from 'fs/promises';
+import os from 'os';
+import path from 'path';
+
 import { Command } from 'commander';
-import prompts from 'prompts';
+import indentString from 'indent-string';
 import kleur from 'kleur';
+import { OpenAI } from 'langchain/llms/openai';
+import prompts from 'prompts';
+import { z } from 'zod';
+
 import {
   containerExists,
   createContainer,
@@ -15,22 +23,16 @@ import {
   waitForDockerDesktop,
   waitForServer,
 } from './containers/local';
-import { Host } from './host/Host';
 import { HOST, PORT } from './defaultAgentServerConfig';
-import { readFile, writeFile } from 'fs/promises';
-import path from 'path';
-import indentString from 'indent-string';
+import { Host } from './host/Host';
 import {
   createClarifyingQuestions,
   createClarifiedTaskDescription,
 } from './host/HostTaskClarification';
-import { OpenAI } from 'langchain/llms/openai';
-import { formatAgentResult } from './host/result/formatAgentResult';
-import { z } from 'zod';
-import os from 'os';
 import { applyAgentResult } from './host/result/applyAgentResult';
-import { sendAgentResultFeedback } from './host/result/sendAgentResultFeedback';
+import { formatAgentResult } from './host/result/formatAgentResult';
 import { formatAgentResultOutput } from './host/result/formatAgentResultOutput';
+import { sendAgentResultFeedback } from './host/result/sendAgentResultFeedback';
 
 const program = new Command();
 program
@@ -61,6 +63,14 @@ const settingsPath = path.join(os.homedir(), '.magnetrc.json');
 const settingsSchema = z.object({
   openAIApiKey: z.string(),
 });
+
+function logContainer(message: string) {
+  console.log(`${kleur.inverse().bold('Container')} ${message}`);
+}
+
+function logAgent(message: string) {
+  console.log(`${kleur.blue().inverse().bold('Agent')} ${message}`);
+}
 
 async function writeSettings(settings: z.infer<typeof settingsSchema>) {
   await writeFile(settingsPath, JSON.stringify(settings, null, 2));
@@ -211,7 +221,7 @@ async function runAsyncTask() {
   if (clarify) {
     logAgent('A few clarifying questions about the task...');
     const questions = await createClarifyingQuestions(taskDescription, model);
-    let clarifications: [string, string][] = [];
+    const clarifications: [string, string][] = [];
     for (const question of questions) {
       const { answer } = await prompts.prompt({
         type: 'text',
@@ -264,7 +274,7 @@ async function runAsyncTask() {
     logAgent(
       kleur.green().bold('Complete! ') + formatAgentResultOutput(result)
     );
-    logAgent(kleur.green().bold('Output written to: ') + `${outfile} ✅`);
+    logAgent(`${kleur.green().bold('Output written to: ')}${outfile} ✅`);
 
     const { feedback } = externalOptions['no-feedback']
       ? { feedback: 'skip' }
@@ -281,11 +291,11 @@ async function runAsyncTask() {
           ],
         });
 
-    if (feedback == 'positive') {
+    if (feedback === 'positive') {
       await sendAgentResultFeedback('positive');
     }
 
-    if (feedback == 'skip' || feedback == 'positive') {
+    if (feedback === 'skip' || feedback === 'positive') {
       const { apply } = await prompts.prompt({
         type: 'toggle',
         name: 'apply',
@@ -299,7 +309,7 @@ async function runAsyncTask() {
       }
     }
 
-    if (feedback == 'negative') {
+    if (feedback === 'negative') {
       const { details } = await prompts.prompt({
         type: 'text',
         name: 'details',
@@ -309,7 +319,7 @@ async function runAsyncTask() {
     }
     process.exit(0);
   } catch (e) {
-    logAgent(kleur.red().bold('Error!') + '\n\n' + indentString(String(e), 2));
+    logAgent(`${kleur.red().bold('Error!')}\n\n${indentString(String(e), 2)}`);
 
     const { send } = externalOptions['no-feedback']
       ? { send: false }
@@ -326,14 +336,6 @@ async function runAsyncTask() {
     }
     process.exit(1);
   }
-}
-
-function logContainer(message: string) {
-  console.log(kleur.inverse().bold('Container') + ' ' + message);
-}
-
-function logAgent(message: string) {
-  console.log(kleur.blue().inverse().bold('Agent') + ' ' + message);
 }
 
 runAsyncTask();
