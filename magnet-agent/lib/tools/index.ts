@@ -1,3 +1,4 @@
+import AskHumanTool from './AskHumanTool';
 import DirectoryReadTool from './DirectoryReadTool';
 import FileReadTool from './FileReadTool';
 import SearchTool from './SearchTool';
@@ -8,6 +9,7 @@ import FileReplaceLinesTool from './FileReplaceLinesTool';
 import FileDeletionTool from './FileDeletionTool';
 
 export {
+  AskHumanTool,
   DirectoryReadTool,
   FileReadTool,
   SearchTool,

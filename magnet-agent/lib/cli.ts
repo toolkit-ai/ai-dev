@@ -77,6 +77,15 @@ async function readSettings(): Promise<z.infer<typeof settingsSchema> | null> {
   }
 }
 
+async function handleAskHuman(question: string): Promise<string> {
+  const { askHuman } = await prompts.prompt({
+    type: 'text',
+    name: 'askHuman',
+    message: question,
+  });
+  return askHuman;
+}
+
 async function runAsyncTask() {
   const externalOptions = program.parse(process.argv).opts();
   const settings = await readSettings();
@@ -228,7 +237,12 @@ async function runAsyncTask() {
   const host = new Host(HOST, PORT);
   await host.uploadDirectory(folder, folder);
 
-  const session = host.startTask(folder, clarifiedTaskDescription, model);
+  const session = host.startTask(
+    folder,
+    clarifiedTaskDescription,
+    model,
+    handleAskHuman
+  );
   session.on('action', (action) => {
     logAgent(
       kleur.blue().bold('Performed action...\n\n') +

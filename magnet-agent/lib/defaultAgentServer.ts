@@ -12,6 +12,7 @@ import {
   FileDeletionTool,
 } from './tools';
 import { HOST, PORT } from './defaultAgentServerConfig';
+import AskHumanTool from './tools/AskHumanTool';
 
 const server = createAgentServer({
   tools: [
@@ -23,6 +24,7 @@ const server = createAgentServer({
     FileInsertTextTool,
     FileReplaceLinesTool,
     FileDeletionTool,
+    AskHumanTool,
   ],
 });
 

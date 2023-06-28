@@ -18,14 +18,18 @@ export class HostTask extends EventEmitter {
 
   model: BaseLLM;
 
+  handleAskHuman: (question: string) => Promise<string>;
+
   constructor(
     url: string,
     repoName: string,
     taskDescription: string,
-    model: BaseLLM
+    model: BaseLLM,
+    handleAskHuman: (question: string) => Promise<string>
   ) {
     super();
     this.model = model;
+    this.handleAskHuman = handleAskHuman;
     this.socket = new WebSocket(url);
     this.socket.on('open', () => {
       this.sendMessage({
@@ -83,6 +87,13 @@ export class HostTask extends EventEmitter {
         });
         break;
       }
+      case 'ask_human':
+        this.sendMessage({
+          type: 'response',
+          requestId: message.requestId,
+          response: await this.handleAskHuman(message.request.question),
+        });
+        break;
       default:
         throw new Error(
           `Unknown request type: ${(message.request as any).type}`
