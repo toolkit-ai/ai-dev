@@ -5,9 +5,9 @@ import { z } from 'zod';
 
 // Define the Zod schema for the input
 const FileDeleteLinesSchema = z.object({
-  path: z.string(),
-  startLine: z.number(),
-  endLine: z.number(),
+  path: z.string().optional(),
+  startLine: z.number().optional(),
+  endLine: z.number().optional(),
 });
 
 type FileDeleteLinesType = z.infer<typeof FileDeleteLinesSchema>;
@@ -23,9 +23,13 @@ class FileDeleteLinesTool extends StructuredTool<typeof FileDeleteLinesSchema> {
 
   // Implement the protected abstract method
   protected async _call(arg: FileDeleteLinesType): Promise<string> {
-    const { path } = arg;
-    const { startLine } = arg;
-    const { endLine } = arg;
+    const { path, startLine, endLine } = arg;
+    if (!path) {
+      return `No path provided. Make sure to follow the JSON schema for this tool.`;
+    }
+    if (startLine === undefined || endLine === undefined) {
+      return `No startLine or endLine provided. Make sure to follow the JSON schema for this tool.`;
+    }
 
     try {
       const data = await fs.readFile(path, 'utf-8');

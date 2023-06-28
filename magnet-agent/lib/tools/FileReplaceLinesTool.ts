@@ -5,10 +5,10 @@ import { z } from 'zod';
 
 // Define the Zod schema for the input
 const FileReplaceLinesSchema = z.object({
-  path: z.string(),
-  startLine: z.number(),
-  endLine: z.number(),
-  newText: z.string(),
+  path: z.string().optional(),
+  startLine: z.number().optional(),
+  endLine: z.number().optional(),
+  newText: z.string().optional(),
 });
 
 type FileReplaceLinesType = z.infer<typeof FileReplaceLinesSchema>;
@@ -26,10 +26,10 @@ class FileReplaceLinesTool extends StructuredTool<
 
   // Implement the protected abstract method
   protected async _call(arg: FileReplaceLinesType): Promise<string> {
-    const { path } = arg;
-    const { startLine } = arg;
-    const { endLine } = arg;
-    const { newText } = arg;
+    const { path, startLine, endLine, newText } = arg;
+    if (!path || startLine === undefined || endLine === undefined || !newText) {
+      return `No path, startLine, endLine, or newText provided. Make sure to follow the JSON schema for this tool.`;
+    }
 
     try {
       const data = await fs.readFile(path, 'utf-8');

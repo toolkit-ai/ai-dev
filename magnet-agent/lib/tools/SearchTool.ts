@@ -7,8 +7,8 @@ import { z } from 'zod';
 
 // Define the Zod schema for the input
 const SearchSchema = z.object({
-  directory: z.string(),
-  searchString: z.string(),
+  directory: z.string().optional(),
+  searchString: z.string().optional(),
 });
 
 type SearchType = z.infer<typeof SearchSchema>;
@@ -26,8 +26,11 @@ class SearchTool extends StructuredTool<typeof SearchSchema> {
   // Implement the protected abstract method
   protected async _call(arg: SearchType): Promise<string> {
     const { searchString, directory } = arg;
-    let result = '';
+    if (!searchString || !directory) {
+      return `No search string or directory provided. Make sure to follow the JSON schema for this tool.`;
+    }
 
+    let result = '';
     try {
       const files = await this.getFiles(directory);
       result = await files.reduce<Promise<string>>(async (accPromise, file) => {
@@ -69,7 +72,8 @@ class SearchTool extends StructuredTool<typeof SearchSchema> {
 
     // eslint-disable-next-line no-restricted-syntax
     for await (const line of rl) {
-      if (line.includes(str)) {
+      // Make the search case-insensitive
+      if (line.toLowerCase().includes(str.toLowerCase())) {
         return true;
       }
     }
