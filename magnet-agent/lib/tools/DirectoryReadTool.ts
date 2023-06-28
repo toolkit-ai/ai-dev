@@ -21,7 +21,11 @@ class DirectoryReadTool extends StructuredTool<typeof DirectoryPathSchema> {
 
   // Implement the protected abstract method
   protected async _call(arg: DirectoryPathType): Promise<string> {
-    const path: string = arg.path || process.cwd(); // Use provided path or current working directory
+    const { path } = arg; // Use provided path or current working directory
+    if (!path) {
+      return `No path provided. Make sure to follow the JSON schema for this tool.`;
+    }
+
     try {
       const files = await fs.readdir(path);
       return files.join(', ');

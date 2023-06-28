@@ -5,9 +5,9 @@ import { z } from 'zod';
 
 // Define the Zod schema for the input
 const FileInsertTextSchema = z.object({
-  path: z.string(),
-  lineNumber: z.number(),
-  text: z.string(),
+  path: z.string().optional(),
+  lineNumber: z.number().optional(),
+  text: z.string().optional(),
 });
 
 type FileInsertTextType = z.infer<typeof FileInsertTextSchema>;
@@ -23,9 +23,10 @@ class FileInsertTextTool extends StructuredTool<typeof FileInsertTextSchema> {
 
   // Implement the protected abstract method
   protected async _call(arg: FileInsertTextType): Promise<string> {
-    const { path } = arg;
-    const { lineNumber } = arg;
-    const { text } = arg;
+    const { path, lineNumber, text } = arg;
+    if (!path || lineNumber === undefined || !text) {
+      return `No path, line number, or text provided. Make sure to follow the JSON schema for this tool.`;
+    }
 
     try {
       const data = await fs.readFile(path, 'utf-8');

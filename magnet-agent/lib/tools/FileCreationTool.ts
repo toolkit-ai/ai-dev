@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 // Define the Zod schema for the input
 const FileCreationSchema = z.object({
-  path: z.string(),
+  path: z.string().optional(),
   content: z.string().optional(),
 });
 
@@ -24,6 +24,9 @@ class FileCreationTool extends StructuredTool<typeof FileCreationSchema> {
   protected async _call(arg: FileCreationType): Promise<string> {
     const { path } = arg;
     const content = arg.content || ''; // If no content provided, create an empty file
+    if (!path) {
+      return `No path provided. Make sure to follow the JSON schema for this tool.`;
+    }
     try {
       await fs.writeFile(path, content);
       return `File created at ${path}`;
