@@ -4,10 +4,14 @@
   "engines": {
     "node": ">=18"
   },
+  "scripts": {
+    "prepare": "husky install"
+  },
   "devDependencies": {
     "@tsconfig/esm": "^1.0.3",
     "@tsconfig/node18": "^2.0.1",
     "@tsconfig/strictest": "^2.0.1",
+    "husky": "^8.0.3",
     "lerna": "^7.0.1"
   },
   "pnpm": {
