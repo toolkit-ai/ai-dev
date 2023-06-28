@@ -5,7 +5,6 @@ import type { BaseLLM } from 'langchain/llms/base';
 import { HostTask } from './HostTask';
 import { createDirectorySource } from './createDirectorySource';
 
-
 export class Host {
   hostname: string;
 
