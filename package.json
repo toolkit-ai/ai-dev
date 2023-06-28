@@ -10,6 +10,11 @@
     "@tsconfig/strictest": "^2.0.1",
     "lerna": "^7.0.1"
   },
+  "pnpm": {
+    "overrides": {
+      "tsconfig-paths": "^4.2.0"
+    }
+  },
   "workspaces": [
     "magnet-agent"
   ]

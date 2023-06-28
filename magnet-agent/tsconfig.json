@@ -1,6 +1,6 @@
 {
   "extends": "../tsconfig.json",
-  "include": ["lib/"],
+  "include": ["lib/", "scripts/"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "outDir": "dist"
