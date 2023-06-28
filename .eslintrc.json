@@ -3,7 +3,7 @@
   "parserOptions": {
     "project": "./tsconfig.json"
   },
-  "ignorePatterns": ["dist", "*.js"],
+  "ignorePatterns": ["dist", "*.js", "*.d.ts"],
   "rules": {
     "class-methods-use-this": "off",
     "no-console": "off",

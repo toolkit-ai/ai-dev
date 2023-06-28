@@ -17,16 +17,17 @@ import type {
   AgentRequestAskHumanResponse,
 } from './AgentRequest';
 import type { AgentStructuredTool } from './AgentStructuredTool';
-import type {
-  HostMessage,
-  HostResponseMessage,
-  HostStartMessage,
-} from '../host/HostMessage';
 import {
   createTaskAgentInput,
   createTaskClarifyingQuestions,
   createClarifiedTask,
 } from './AgentTasks';
+import type {
+  HostMessage,
+  HostResponseMessage,
+  HostStartMessage,
+} from '../host/HostMessage';
+
 export class Agent {
   repos: AgentRepos;
 
@@ -91,7 +92,7 @@ export class Agent {
         initialTaskDescription,
         model
       );
-      let clarifications: [string, string][] = [];
+      const clarifications: [string, string][] = [];
       for (const question of questions) {
         const answer = await this.sendRequest<
           AgentAskHumanRequest,

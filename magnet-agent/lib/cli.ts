@@ -23,8 +23,8 @@ import {
   waitForDockerDesktop,
   waitForServer,
 } from './containers/local';
-import { Host } from './host';
 import { HOST, PORT } from './defaultAgentServerConfig';
+import { Host } from './host';
 import { applyAgentResult } from './host/result/applyAgentResult';
 import { formatAgentResult } from './host/result/formatAgentResult';
 import { formatAgentResultOutput } from './host/result/formatAgentResultOutput';
@@ -226,10 +226,10 @@ async function runAsyncTask() {
     clarify
   );
 
-  session.on('update-task', (taskDescription: any) => {
+  session.on('update-task', (newTaskDescription: any) => {
     logAgent(
       kleur.blue().bold('Task revised by agent...\n\n') +
-        indentString(`${kleur.bold().underline('Task')}: ${taskDescription}`)
+        indentString(`${kleur.bold().underline('Task')}: ${newTaskDescription}`)
     );
   });
 
