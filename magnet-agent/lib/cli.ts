@@ -226,12 +226,10 @@ async function runAsyncTask() {
     clarify
   );
 
-  session.on('update-task', (update: any) => {
+  session.on('update-task', (taskDescription: any) => {
     logAgent(
       kleur.blue().bold('Task revised by agent...\n\n') +
-        indentString(
-          `${kleur.bold().underline('Task')}: ${update.taskDescription}`
-        )
+        indentString(`${kleur.bold().underline('Task')}: ${taskDescription}`)
     );
   });
 

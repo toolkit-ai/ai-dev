@@ -10,6 +10,7 @@ import type {
   AgentErrorMessage,
   AgentCompleteMessage,
   AgentActionMessage,
+  AgentUpdateTaskMessage,
 } from '../agent/AgentMessage';
 import type { AgentResult } from '../agent/AgentResult';
 
@@ -64,6 +65,9 @@ export class HostTask extends EventEmitter {
       case 'action':
         this.handleActionMessage(message);
         break;
+      case 'update-task':
+        this.handleUpdateTaskMessage(message);
+        break;
       case 'error':
         this.handleErrorMessage(message);
         break;
@@ -105,6 +109,10 @@ export class HostTask extends EventEmitter {
 
   private async handleActionMessage(message: AgentActionMessage) {
     this.emit('action', message.action);
+  }
+
+  private async handleUpdateTaskMessage(message: AgentUpdateTaskMessage) {
+    this.emit('update-task', message.taskDescription);
   }
 
   private async handleCompleteMessage(message: AgentCompleteMessage) {

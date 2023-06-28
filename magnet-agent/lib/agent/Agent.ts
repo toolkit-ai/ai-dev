@@ -107,6 +107,10 @@ export class Agent {
         clarifications,
         model
       );
+      this.sendMessage({
+        type: 'update-task',
+        taskDescription,
+      });
     }
 
     const [executor, input] = await Promise.all([
