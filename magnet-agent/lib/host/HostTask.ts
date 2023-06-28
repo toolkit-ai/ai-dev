@@ -25,7 +25,8 @@ export class HostTask extends EventEmitter {
     repoName: string,
     taskDescription: string,
     model: BaseLLM,
-    handleAskHuman: (question: string) => Promise<string>
+    handleAskHuman: (question: string) => Promise<string>,
+    clarify: boolean = false
   ) {
     super();
     this.model = model;
@@ -36,6 +37,7 @@ export class HostTask extends EventEmitter {
         type: 'start',
         repoName,
         taskDescription,
+        clarify,
       });
     });
     this.socket.on('message', (message: string) => {

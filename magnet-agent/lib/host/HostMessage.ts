@@ -8,6 +8,7 @@ export type HostStartMessage = {
   type: 'start';
   repoName: string;
   taskDescription: string;
+  clarify: boolean;
 };
 
 export type HostResponseMessage = {
