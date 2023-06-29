@@ -1,5 +1,6 @@
-import { existsSync } from 'fs';
+import { existsSync, createWriteStream, createReadStream, statSync } from 'fs';
 import fs from 'fs/promises';
+import os from 'os';
 import path from 'path';
 
 import archiver from 'archiver';
@@ -29,16 +30,31 @@ export async function createDirectorySource(directoryPath: string) {
   const gitignoreList = gitignorePath
     ? (await fs.readFile(gitignorePath, 'utf8')).split('\n')
     : [];
-  const gitignore = ignore().add(gitignoreList);
+  const gitignore = ignore().add([...gitignoreList, '.git']);
+  const tmpdir = await fs.mkdtemp(path.join(os.tmpdir(), 'repo-'));
 
-  const archive = archiver('zip', { zlib: { level: 9 } });
-  walkSync(resolved)
-    .map((absolute) => path.relative(resolved, absolute))
-    .filter(gitignore.createFilter())
-    .forEach((relative) => {
-      archive.file(path.resolve(relative), { name: relative });
+  return new Promise((resolve, reject) => {
+    const tmpfile = path.join(tmpdir, 'archive.zip');
+
+    const tmp = createWriteStream(tmpfile);
+    tmp.on('close', () => {
+      resolve(createReadStream(tmpfile));
     });
 
-  await archive.finalize();
-  return archive;
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    archive.pipe(tmp);
+    archive.on('error', (err) => {
+      reject(err);
+    });
+
+    walkSync(resolved)
+      .filter((absolute) => statSync(absolute).isFile())
+      .map((absolute) => path.relative(resolved, absolute))
+      .filter(gitignore.createFilter())
+      .forEach((relative) => {
+        archive.file(path.join(resolved, relative), { name: relative });
+      });
+
+    archive.finalize();
+  });
 }

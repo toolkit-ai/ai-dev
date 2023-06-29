@@ -84,7 +84,7 @@ export async function createTaskAgentInput(
   const formatInstructions = parser.getFormatInstructions();
   const prompt = new PromptTemplate({
     template:
-      "You're an expert engineer. The codebase you're working with is located in the {workspace_dir} directory. I'm the product manager and need you to implement this task: '{task_description}'. Here's a listing of the first 50 files in the {workspace_dir} directory: {files}. Explore the codebase, and based on what you understand, complete the task. If the task is unclear, you can ask me via AskHumanTool. {readme} \n{format_instructions}",
+      "You're an expert engineer. The codebase you're working with is located in the {workspace_dir} directory. I'm the product manager and need you to implement this task: '{task_description}'. Here's a listing of the first 10 files in the {workspace_dir} directory: {files}. Explore the codebase, and based on what you understand, complete the task. If the task is unclear, you can ask me via AskHumanTool. {readme} \n{format_instructions}",
     inputVariables: ['task_description', 'workspace_dir', 'files', 'readme'],
     partialVariables: { format_instructions: formatInstructions },
   });
@@ -92,9 +92,9 @@ export async function createTaskAgentInput(
   const input = await prompt.format({
     task_description: taskDescription,
     workspace_dir: workspaceDir,
-    files: JSON.stringify(files.slice(0, 50)),
+    files: JSON.stringify(files.slice(0, 10)),
     readme: readme
-      ? `Here's an excerpt of the README:\n"""\n${readme.slice(0, 1000)}\n"""\n`
+      ? `Here's an excerpt of the README:\n"""\n${readme.slice(0, 500)}\n"""\n`
       : '',
   });
 

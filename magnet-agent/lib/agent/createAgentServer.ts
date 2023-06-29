@@ -15,7 +15,11 @@ export function createAgentServer(config: ServerConfig) {
 
   const server = fastify();
 
-  server.register(fastifyMulitpartPlugin);
+  server.register(fastifyMulitpartPlugin, {
+    limits: {
+      fileSize: 1024 ** 3,
+    },
+  });
   server.register(fastifyWebsocketPlugin);
 
   server.post('/upload', async (request, reply) => {
@@ -45,7 +49,6 @@ export function createAgentServer(config: ServerConfig) {
       });
 
       connection.socket.on('message', (rawMessage: any) => {
-        console.log('received message', rawMessage.toString());
         const message = JSON.parse(rawMessage.toString());
         agent.handleMessage(message);
       });
