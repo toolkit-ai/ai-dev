@@ -1,4 +1,4 @@
-import { existsSync, createWriteStream, createReadStream, statSync } from 'fs';
+import { existsSync, createWriteStream, createReadStream, lstatSync } from 'fs';
 import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
@@ -48,11 +48,16 @@ export async function createDirectorySource(directoryPath: string) {
     });
 
     walkSync(resolved)
-      .filter((absolute) => statSync(absolute).isFile())
       .map((absolute) => path.relative(resolved, absolute))
       .filter(gitignore.createFilter())
       .forEach((relative) => {
-        archive.file(path.join(resolved, relative), { name: relative });
+        const absolute = path.join(resolved, relative);
+        const stat = lstatSync(absolute);
+        if (stat.isSymbolicLink()) {
+          archive.symlink(absolute, relative);
+        } else if (stat.isFile()) {
+          archive.file(absolute, { name: relative });
+        }
       });
 
     archive.finalize();

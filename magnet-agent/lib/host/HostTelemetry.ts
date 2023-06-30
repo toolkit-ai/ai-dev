@@ -34,7 +34,8 @@ export async function sendAgentError(error: any) {
 
 export async function sendAgentResultFeedback(
   feedback: AgentResultFeedback,
-  details: any | null = null
+  details: any | null = null,
+  email: string | null = null
 ) {
-  await sendEvent('agent_result_feedback', { feedback, details });
+  await sendEvent('agent_result_feedback', { feedback, details, email });
 }
