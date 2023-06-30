@@ -25,13 +25,19 @@ import {
 } from './containers/local';
 import { HOST, PORT } from './defaultAgentServerConfig';
 import { Host } from './host';
+import {
+  analyticsDisabled,
+  sendAgentError,
+  sendAgentResultFeedback,
+} from './host/HostTelemetry';
 import { applyAgentResult } from './host/result/applyAgentResult';
 import { formatAgentResult } from './host/result/formatAgentResult';
 import { formatAgentResultOutput } from './host/result/formatAgentResultOutput';
-import { sendAgentResultFeedback } from './host/result/sendAgentResultFeedback';
+import { version } from './version';
 
 const program = new Command();
 program
+  .version(version)
   .option('-f, --folder <repo>', 'Specify the folder/repository')
   .option(
     '-o, --outfile <outfile>',
@@ -42,8 +48,7 @@ program
   .option('-m, --model <model>', 'Specify the OpenAI model to use')
   .option('-r, --rebuild', 'Rebuild the image and container before running')
   .option('-c, --clarify', 'Clarify the task description before running')
-  .option('-a, --apply', 'Apply the task description before running')
-  .option('-n, --no-feedback', 'Do not ask about feedback on the agent');
+  .option('-a, --apply', 'Apply the task description before running');
 
 const optionSchema = z.object({
   folder: z.string(),
@@ -66,6 +71,13 @@ function logContainer(message: string) {
 
 function logAgent(message: string) {
   console.log(`${kleur.blue().inverse().bold('Agent')} ${message}`);
+}
+
+function logError(message: any) {
+  const messageString =
+    message instanceof Error ? message.message : String(message);
+
+  console.log(`${kleur.red().inverse().bold('Error')} ${messageString}`);
 }
 
 async function writeSettings(settings: z.infer<typeof settingsSchema>) {
@@ -248,74 +260,62 @@ async function runAsyncTask() {
     );
   });
 
+  const result = await session.getResult();
+  await writeFile(path.resolve(outfile), formatAgentResult(result));
+  logAgent(kleur.green().bold('Complete! ') + formatAgentResultOutput(result));
+  logAgent(`${kleur.green().bold('Output written to: ')}${outfile} ✅`);
+
+  const { feedback } = analyticsDisabled
+    ? { feedback: 'skip' }
+    : await prompts.prompt({
+        type: 'select',
+        name: 'feedback',
+        message: 'Did the agent do a good job? (Sends feedback to Toolkit AI)',
+        initial: 0,
+        choices: [
+          { title: 'Yes', value: 'positive' },
+          { title: 'No', value: 'negative' },
+          { title: 'Skip', value: 'skip' },
+        ],
+      });
+
+  if (feedback === 'positive') {
+    await sendAgentResultFeedback('positive');
+  }
+
+  if (feedback === 'skip' || feedback === 'positive') {
+    const { apply } = await prompts.prompt({
+      type: 'toggle',
+      name: 'apply',
+      message: 'Apply the changes to local copy?',
+      initial: false,
+      active: 'yes',
+      inactive: 'no',
+    });
+    if (apply) {
+      await applyAgentResult(result, folder);
+    }
+  }
+
+  if (feedback === 'negative') {
+    const { details } = await prompts.prompt({
+      type: 'text',
+      name: 'details',
+      message: 'What went wrong?',
+    });
+    await sendAgentResultFeedback('negative', details as string);
+  }
+}
+
+async function runAsyncTaskWithCrashWrapper() {
   try {
-    const result = await session.getResult();
-    await writeFile(path.resolve(outfile), formatAgentResult(result));
-    logAgent(
-      kleur.green().bold('Complete! ') + formatAgentResultOutput(result)
-    );
-    logAgent(`${kleur.green().bold('Output written to: ')}${outfile} ✅`);
-
-    const { feedback } = externalOptions['no-feedback']
-      ? { feedback: 'skip' }
-      : await prompts.prompt({
-          type: 'select',
-          name: 'feedback',
-          message:
-            'Did the agent do a good job? (Sends feedback to Toolkit AI)',
-          initial: 0,
-          choices: [
-            { title: 'Yes', value: 'positive' },
-            { title: 'No', value: 'negative' },
-            { title: 'Skip', value: 'skip' },
-          ],
-        });
-
-    if (feedback === 'positive') {
-      await sendAgentResultFeedback('positive');
-    }
-
-    if (feedback === 'skip' || feedback === 'positive') {
-      const { apply } = await prompts.prompt({
-        type: 'toggle',
-        name: 'apply',
-        message: 'Apply the changes to local copy?',
-        initial: false,
-        active: 'yes',
-        inactive: 'no',
-      });
-      if (apply) {
-        await applyAgentResult(result, folder);
-      }
-    }
-
-    if (feedback === 'negative') {
-      const { details } = await prompts.prompt({
-        type: 'text',
-        name: 'details',
-        message: 'What went wrong?',
-      });
-      await sendAgentResultFeedback('negative', details as string);
-    }
+    await runAsyncTask();
     process.exit(0);
   } catch (e) {
-    logAgent(`${kleur.red().bold('Error!')}\n\n${indentString(String(e), 2)}`);
-
-    const { send } = externalOptions['no-feedback']
-      ? { send: false }
-      : await prompts.prompt({
-          type: 'toggle',
-          name: 'send',
-          message: 'Send the error to ToolkitAI?',
-          initial: false,
-          active: 'yes',
-          inactive: 'no',
-        });
-    if (send) {
-      await sendAgentResultFeedback('error', e as any);
-    }
+    logError(e);
+    await sendAgentError(e);
     process.exit(1);
   }
 }
 
-runAsyncTask();
+runAsyncTaskWithCrashWrapper();
