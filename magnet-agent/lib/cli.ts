@@ -225,10 +225,12 @@ async function runAsyncTask() {
 
   const model = new OpenAI({ modelName, openAIApiKey });
 
-  logAgent('Running task...');
+  logAgent('Starting agent...');
 
   const host = new Host(HOST, PORT);
   await host.uploadDirectory(folder, folder);
+
+  logAgent('Agent running task...');
 
   const session = host.startTask(
     folder,
@@ -303,7 +305,16 @@ async function runAsyncTask() {
       name: 'details',
       message: 'What went wrong?',
     });
-    await sendAgentResultFeedback('negative', details as string);
+    const { email } = await prompts.prompt({
+      type: 'text',
+      name: 'email',
+      message: 'What email can we contact you at?',
+    });
+    await sendAgentResultFeedback(
+      'negative',
+      details as string,
+      email as string
+    );
   }
 }
 
