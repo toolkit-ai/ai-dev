@@ -6,11 +6,8 @@ import {
   FileReadTool,
   DirectoryReadTool,
   SearchTool,
-  FileCreationTool,
-  FileDeleteLinesTool,
-  FileInsertTextTool,
-  FileReplaceLinesTool,
-  FileDeletionTool,
+  FileWriteTool,
+  FileDeleteTool,
 } from './tools';
 import AskHumanTool from './tools/AskHumanTool';
 
@@ -19,11 +16,8 @@ const server = createAgentServer({
     FileReadTool,
     DirectoryReadTool,
     SearchTool,
-    FileCreationTool,
-    FileDeleteLinesTool,
-    FileInsertTextTool,
-    FileReplaceLinesTool,
-    FileDeletionTool,
+    FileWriteTool,
+    FileDeleteTool,
     AskHumanTool,
   ],
 });

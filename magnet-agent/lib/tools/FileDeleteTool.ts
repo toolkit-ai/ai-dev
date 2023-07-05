@@ -5,23 +5,23 @@ import { z } from 'zod';
 import { AgentStructuredTool } from '../agent/AgentStructuredTool';
 
 // Define the Zod schema for the input
-const FileDeletionSchema = z.object({
+const FileDeleteSchema = z.object({
   path: z.string(),
 });
 
-type FileDeletionType = z.infer<typeof FileDeletionSchema>;
+type FileDeleteType = z.infer<typeof FileDeleteSchema>;
 
 // Define the tool
-class FileDeletionTool extends AgentStructuredTool<typeof FileDeletionSchema> {
+class FileDeleteTool extends AgentStructuredTool<typeof FileDeleteSchema> {
   // Implement the required properties
-  name = 'FileDeletionTool';
+  name = 'FileDeleteTool';
 
   description = 'A tool that deletes a file';
 
-  schema = FileDeletionSchema;
+  schema = FileDeleteSchema;
 
   // Implement the protected abstract method
-  protected async _call(arg: FileDeletionType): Promise<string> {
+  protected async _call(arg: FileDeleteType): Promise<string> {
     const { path } = arg;
 
     try {
@@ -33,4 +33,4 @@ class FileDeletionTool extends AgentStructuredTool<typeof FileDeletionSchema> {
   }
 }
 
-export default FileDeletionTool;
+export default FileDeleteTool;
