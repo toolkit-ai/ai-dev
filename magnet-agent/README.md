@@ -135,9 +135,13 @@ import {createImage, createContainer, waitForContainer} from 'magnet-agent/conta
 
 ## Telemetry
 
-Magnet Agent's CLI currently collects limited telemetry to help us improve the product. Types of events collected:
+Magnet Agent's CLI currently collects limited telemetry to help us improve the product. Examples of events that may be collected:
 
-- `agent_error`: When the agent crashes.
+- `start`: When the CLI starts.
+- `complete`: When the CLI successfully runs a task.
+- `interrupt`: When the CLI is interrupted by the user.
+- `performance`: How long it took the CLI to complete a step in the task.
+- `error`: When the CLI crashes.
 - `agent_result_feedback`: Feedback you've explicitly provided about the agent's result.
 
 You can opt out of telemetry by setting the `MAGNET_AGENT_TELEMETRY` environment variable to `false`.

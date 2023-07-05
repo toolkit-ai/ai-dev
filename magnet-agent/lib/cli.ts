@@ -27,8 +27,14 @@ import { HOST, PORT } from './defaultAgentServerConfig';
 import { Host } from './host';
 import {
   analyticsDisabled,
-  sendAgentError,
+  sendError,
   sendAgentResultFeedback,
+  sendStart,
+  shutdownAsync,
+  sendDockerDesktopNotInstalled,
+  measureAndSendPerformance,
+  sendComplete,
+  sendInterrupt,
 } from './host/HostTelemetry';
 import { applyAgentResult } from './host/result/applyAgentResult';
 import { formatAgentResult } from './host/result/formatAgentResult';
@@ -187,85 +193,107 @@ async function runAsyncTask() {
   } = options;
 
   if (!(await isDockerDesktopInstalled())) {
+    sendDockerDesktopNotInstalled();
     console.error(
       'Docker Desktop is not installed. Please visit https://www.docker.com/products/docker-desktop to install it.'
     );
+    await shutdownAsync();
     process.exit(1);
   }
 
-  if (!(await isDockerDesktopRunning())) {
-    logContainer('Docker Desktop is not running, launching it now...');
-    await launchDockerDesktop();
-    await waitForDockerDesktop();
-  }
-
-  if (!(await imageExists()) || rebuild) {
-    logContainer('Creating image! This may take a while the first time...');
-    if (await containerExists()) {
-      logContainer('Deleting existing container...');
-      await deleteContainer();
+  await measureAndSendPerformance('docker-desktop-setup', async () => {
+    if (!(await isDockerDesktopRunning())) {
+      logContainer('Docker Desktop is not running, launching it now...');
+      await launchDockerDesktop();
+      await waitForDockerDesktop();
     }
-    await createImage(path.join(__dirname, '..'), 'Dockerfile');
-  }
+  });
 
-  const hasContainer = await containerExists();
-  if (!hasContainer || rebuild) {
-    if (hasContainer) {
-      logContainer('Deleting existing container...');
-      await deleteContainer();
-    }
-
-    logContainer('Creating container...');
-    await createContainer(PORT);
-  }
-
-  logContainer('Waiting for container...');
-  await waitForServer(PORT);
-  logContainer(kleur.green('Container ready! ✅'));
-
-  const model = new OpenAI({ modelName, openAIApiKey });
-
-  logAgent('Starting agent...');
-
-  const host = new Host(HOST, PORT);
-  await host.uploadDirectory(folder, folder);
-
-  logAgent('Agent running task...');
-
-  const session = host.startTask(
-    folder,
-    taskDescription,
-    model,
-    handleAskHuman,
-    clarify
+  await measureAndSendPerformance(
+    'image-setup',
+    async () => {
+      if (!(await imageExists()) || rebuild) {
+        logContainer('Creating image! This may take a while the first time...');
+        if (await containerExists()) {
+          logContainer('Deleting existing container...');
+          await deleteContainer();
+        }
+        await createImage(path.join(__dirname, '..'), 'Dockerfile');
+      }
+    },
+    { rebuild }
   );
 
-  session.on('update-task', (newTaskDescription: any) => {
-    logAgent(
-      kleur.blue().bold('Task revised by agent...\n\n') +
-        indentString(`${kleur.bold().underline('Task')}: ${newTaskDescription}`)
-    );
+  await measureAndSendPerformance(
+    'container-setup',
+    async () => {
+      const hasContainer = await containerExists();
+      if (!hasContainer || rebuild) {
+        if (hasContainer) {
+          logContainer('Deleting existing container...');
+          await deleteContainer();
+        }
+
+        logContainer('Creating container...');
+        await createContainer(PORT);
+      }
+
+      logContainer('Waiting for container...');
+      await waitForServer(PORT);
+      logContainer(kleur.green('Container ready! ✅'));
+    },
+    { rebuild }
+  );
+
+  const model = new OpenAI({ modelName, openAIApiKey });
+  const host = new Host(HOST, PORT);
+
+  logAgent('Uploading code to agent...');
+  await measureAndSendPerformance('upload-code', async () => {
+    await host.uploadDirectory(folder, folder);
   });
 
-  session.on('action', (action: any) => {
-    logAgent(
-      kleur.blue().bold('Performed action...\n\n') +
-        indentString(
-          `${kleur.bold().underline('Tool')}: ${action.tool}\n\n` +
-            `${kleur.bold().underline('Tool Input')}:\n${indentString(
-              JSON.stringify(action.toolInput, null, 2),
-              2
-            )}\n\n` +
-            `${kleur.bold().underline('Log')}:\n${indentString(action.log)}`,
-          2
-        )
+  logAgent('Agent running task...');
+  const result = await measureAndSendPerformance('run-task', async () => {
+    const session = host.startTask(
+      folder,
+      taskDescription,
+      model,
+      handleAskHuman,
+      clarify
     );
+
+    session.on('update-task', (newTaskDescription: any) => {
+      logAgent(
+        kleur.blue().bold('Task revised by agent...\n\n') +
+          indentString(
+            `${kleur.bold().underline('Task')}: ${newTaskDescription}`
+          )
+      );
+    });
+
+    session.on('action', (action: any) => {
+      logAgent(
+        kleur.blue().bold('Performed action...\n\n') +
+          indentString(
+            `${kleur.bold().underline('Tool')}: ${action.tool}\n\n` +
+              `${kleur.bold().underline('Tool Input')}:\n${indentString(
+                JSON.stringify(action.toolInput, null, 2),
+                2
+              )}\n\n` +
+              `${kleur.bold().underline('Log')}:\n${indentString(action.log)}`,
+            2
+          )
+      );
+    });
+
+    return session.getResult();
   });
 
-  const result = await session.getResult();
   await writeFile(path.resolve(outfile), formatAgentResult(result));
   logAgent(kleur.green().bold('Complete! ') + formatAgentResultOutput(result));
   logAgent(`${kleur.green().bold('Output written to: ')}${outfile} ✅`);
+  sendComplete();
 
   const { feedback } = analyticsDisabled
     ? { feedback: 'skip' }
@@ -282,7 +310,7 @@ async function runAsyncTask() {
       });
 
   if (feedback === 'positive') {
-    await sendAgentResultFeedback('positive');
+    sendAgentResultFeedback('positive');
   }
 
   if (feedback === 'skip' || feedback === 'positive') {
@@ -310,23 +338,28 @@ async function runAsyncTask() {
       name: 'email',
       message: 'What email can we contact you at?',
     });
-    await sendAgentResultFeedback(
-      'negative',
-      details as string,
-      email as string
-    );
+    sendAgentResultFeedback('negative', details as string, email as string);
   }
 }
 
 async function runAsyncTaskWithCrashWrapper() {
   try {
+    sendStart();
     await runAsyncTask();
     process.exit(0);
   } catch (e) {
     logError(e);
-    await sendAgentError(e);
+    sendError(e);
     process.exit(1);
+  } finally {
+    await shutdownAsync();
   }
 }
 
 runAsyncTaskWithCrashWrapper();
+
+process.on('SIGINT', async () => {
+  sendInterrupt();
+  await shutdownAsync();
+  process.exit();
+});
