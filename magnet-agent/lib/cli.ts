@@ -45,13 +45,19 @@ import { version } from './version';
 const program = new Command();
 program
   .version(version)
-  .option('-f, --folder <repo>', 'Specify the folder/repository')
+  .option(
+    '-f, --folder <repo>',
+    'Specify the folder/repository with the code to edit'
+  )
   .option(
     '-o, --outfile <outfile>',
     "Specify a file to output the agent's results in"
   )
-  .option('-t, --task <task>', 'Specify the task')
-  .option('-tf, --taskfile <taskfile>', 'Specify the task as an input file')
+  .option('-t, --task <task>', 'Specify the coding task')
+  .option(
+    '-tf, --taskfile <taskfile>',
+    'Specify the coding task as a path to an input file'
+  )
   .option('-m, --model <model>', 'Specify the OpenAI model to use')
   .option('-r, --rebuild', 'Rebuild the image and container before running')
   .option('-c, --clarify', 'Clarify the task description before running')
@@ -131,13 +137,13 @@ async function runAsyncTask() {
       type: 'text',
       name: 'folder',
       initial: process.cwd(),
-      message: 'Specify the folder/repository:',
+      message: 'Specify the folder/repository with the code to edit:',
       validate: (value: string) => (value ? true : 'This field is required'),
     },
     {
       type: 'text',
       name: 'taskDescription',
-      message: 'Specify the task:',
+      message: 'Specify the coding task:',
       validate: (value: string) => (value ? true : 'This field is required'),
     },
     {
