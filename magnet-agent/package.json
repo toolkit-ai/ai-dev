@@ -4,7 +4,12 @@
   "description": "AI coding assistant that uses tools to perform tasks on your codebase.",
   "keywords": [
     "ai",
-    "gpt"
+    "gpt",
+    "openai",
+    "langchain",
+    "agent",
+    "code",
+    "assistant"
   ],
   "author": "Toolkit AI <team@toolkit.ai>",
   "homepage": "https://toolkitai.notion.site/Magnet-Docs-55cd2321039443d695235cadb884cabb?pvs=4",
