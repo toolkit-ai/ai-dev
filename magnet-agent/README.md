@@ -1,154 +1,38 @@
 # Magnet Agent
 
-Magent Agent is a tool-enabled coding assistant that can perform open-ended tasks on your codebase:
+**Magnet Agent is an AI coding assistant that uses tools to perform open-ended tasks on your codebase.**
+
+It’s like your very own dedicated engineer:
 
 - **Isolated**. It spins up a Docker sandbox for coding tasks so it's isolated from your local environment.
 - **Portable**. We're making container APIs for local and cloud environments.
 - **Extensible**. You can add your own tasks by writing plugins with LangChain.
 
-This package contains the implementation of the agent, core tools, and an implementation of a wire protocol for communicating with agents running in a container from a container host. You'll use it if you want to build your own agent server or tool.
+Exameples of open-ended tasks you can run with Magnet Agent:
 
-## Install
-
-```bash
-npm install magnet-agent
-```
+- “Update my README.md to describe how X feature works”
+- “Find and fix TODO comments in my codebase”
+- “Install Sentry in my project”
 
 ## Usage
 
-You can run Magnet Agent with our CLI by calling:
+The easiest way to use Magnet Agent is with our CLI. You can run it with:
 
 ```bash
-npx magnet-agent
+npx magnet-agent@latest
 ```
 
 Then, you'll be prompted to enter a folder, task description, and output file. The agent will run the task on the folder and output the results to the file.
 
-You can also run Magnet Agent non-interactively with the following command:
+For more information, see [CLI](https://toolkitai.notion.site/CLI-e7368c0447fb4e4ba6c0fbcbcf94879a?pvs=4).
 
-```bash
-OPENAI_API_KEY=your_openai_api_key_here npx magnet-agent -f ./ -t "Your task here." -o ./output
-```
+## Documentation
 
-- `-f` is the path to the folder you want to run the task on.
-- `-t` is the task description.
-- `-tf` is a file that contains a task description.
-- `-o` is the path to the file where the agent will output the results.
-- `-c` will prompt the agent to interactively clarify the task description before implementing.
-- `-r` will cause the Docker image and container to be rebuilt before running the task.
+See [Documentation](https://toolkitai.notion.site/Magnet-Docs-55cd2321039443d695235cadb884cabb?pvs=4).
 
-You'll need to have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running on your machine.
+## Contributing
 
-## API
-
-You can build custom services that use Magnet Agent to run tasks on codebases.
-
-### Overview
-
-With Magnet Agent, there's a few layers of abstraction:
-
-1. **Agent Server**. The agent server is the server that runs in the container, exposing agents to the host over a WebSockets wire protocol.
-2. **Container API**. The container API is the interface that boots the container that the agent server runs in.
-3. **Host**. The host is the process that runs the agent. It's responsible for communicating between the agent server and the user.
-
-### Creating an Agent Server
-
-If you are building a custom agent server, you can use the `createAgentServer` function to create an agent server with a set of tools.
-
-```js
-import {
-  createAgentServer,
-  FileReadTool,
-  DirectoryReadTool,
-  SearchTool,
-  FileCreationTool,
-  FileDeleteLinesTool,
-  FileInsertTextTool,
-  FileReplaceLinesTool,
-  FileDeletionTool,
-} from 'magnet-agent/agent';
-
-const PORT = 8080;
-const HOST = 'localhost';
-
-// Add tools to the agent server
-const server = createAgentServer({
-  tools: [
-    new FileReadTool(),
-    new DirectoryReadTool(),
-    new SearchTool(),
-    new FileCreationTool(),
-    new FileDeleteLinesTool(),
-    new FileInsertTextTool(),
-    new FileReplaceLinesTool(),
-    new FileDeletionTool(),
-    // Add your custom tools to the custom agent server
-    new MyCustomTool(),
-  ],
-});
-
-server.listen({ port: PORT, host: HOST }, (err) => {
-  // Indicate to the parent process that the server is ready
-  console.log(`Server running on port ${PORT}`);
-  if (err) {
-    server.log.error(err);
-    process.exit(1);
-  }
-});
-```
-
-### Performing Tasks with your Agent Server
-
-Then, you can use the Magnet Agent API to boot your container, and run tasks on it:
-
-```ts
-import {Host} = from 'magnet-agent';
-import {createImage, createContainer, waitForContainer} from 'magnet-agent/containers/local';
-
-(async function runAgent() {
-  // Boot the Docker container.
-  await createImage();
-  await createContainer();
-  await waitForContainer();
-
-  // Connect to a local Docker daemon.
-  const host = new Host(HOST, PORT, modelName, openAIApiKey);
-
-  // Upload the folder to the local Docker daemon for use in coding projects by agents.
-  await host.uploadDirectory(folderName, folder);
-
-  // Create an agent to perform a task.
-  const session = host.runTask(folderName, task, /* ...snip... */);
-  session.on('action', (action) => {
-    // Stream the agent's actions to the console.
-  });
-
-  // Wait for the agent to finish.
-  try {
-    const result = await session.getResult();
-    // Print the result or apply it to the codebase.
-  } catch (e) {
-    // Handle errors.
-  }
-})();
-```
-
-## Telemetry
-
-Magnet Agent's CLI currently collects limited telemetry to help us improve the product. Examples of events that may be collected:
-
-- `start`: When the CLI starts.
-- `complete`: When the CLI successfully runs a task.
-- `interrupt`: When the CLI is interrupted by the user.
-- `performance`: How long it took the CLI to complete a step in the task.
-- `error`: When the CLI crashes.
-- `agent_result_feedback`: Feedback you've explicitly provided about the agent's result.
-
-You can opt out of telemetry by setting the `MAGNET_AGENT_TELEMETRY` environment variable to `false`.
-
-## Development
-
-See the [development section in the root readme](../../README.md).
+See [Contributing](https://toolkitai.notion.site/Contributing-d6ff3008d5664da8ba3cd59efe1f5511?pvs=4).
 
 ## License
 

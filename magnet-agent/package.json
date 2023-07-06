@@ -1,13 +1,13 @@
 {
   "name": "magnet-agent",
   "version": "0.1.22",
-  "description": "Contains the agent and its tools run inside a container.",
+  "description": "AI coding assistant that uses tools to perform tasks on your codebase.",
   "keywords": [
     "ai",
     "gpt"
   ],
   "author": "Toolkit AI <team@toolkit.ai>",
-  "homepage": "https://www.magnet.run/",
+  "homepage": "https://toolkitai.notion.site/Magnet-Docs-55cd2321039443d695235cadb884cabb?pvs=4",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=18"
