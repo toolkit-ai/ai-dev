@@ -1,6 +1,6 @@
 {
   "name": "magnet-agent",
-  "version": "0.1.23",
+  "version": "0.1.24",
   "description": "AI coding assistant that uses tools to perform tasks on your codebase.",
   "keywords": [
     "ai",
