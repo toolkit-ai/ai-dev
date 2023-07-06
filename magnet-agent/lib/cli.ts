@@ -7,7 +7,7 @@ import path from 'path';
 import { Command } from 'commander';
 import indentString from 'indent-string';
 import kleur from 'kleur';
-import { OpenAI } from 'langchain/llms/openai';
+import { ChatOpenAI } from 'langchain/chat_models/openai';
 import prompts from 'prompts';
 import { z } from 'zod';
 
@@ -17,6 +17,7 @@ import {
   createImage,
   deleteContainer,
   imageExists,
+  isContainerRunning,
   isDockerDesktopInstalled,
   isDockerDesktopRunning,
   launchDockerDesktop,
@@ -150,10 +151,10 @@ async function runAsyncTask() {
       type: 'select',
       name: 'model',
       message: 'Specify the OpenAI model to use:',
-      initial: 0,
+      initial: 1,
       choices: [
-        { title: 'GPT-3.5 Turbo', value: 'gpt-3.5-turbo' },
-        { title: 'GPT-4', value: 'gpt-4' },
+        { title: 'GPT-3.5 Turbo', value: 'gpt-3.5-turbo-0613' },
+        { title: 'GPT-4 (Recommended)', value: 'gpt-4-0613' },
       ],
     },
     {
@@ -227,8 +228,11 @@ async function runAsyncTask() {
   await measureAndSendPerformance(
     'container-setup',
     async () => {
-      const hasContainer = await containerExists();
-      if (!hasContainer || rebuild) {
+      const [hasContainer, isRunning] = await Promise.all([
+        containerExists(),
+        isContainerRunning(),
+      ]);
+      if (!(hasContainer && isRunning) || rebuild) {
         if (hasContainer) {
           logContainer('Deleting existing container...');
           await deleteContainer();
@@ -245,7 +249,7 @@ async function runAsyncTask() {
     { rebuild }
   );
 
-  const model = new OpenAI({ modelName, openAIApiKey });
+  const model = new ChatOpenAI({ modelName, openAIApiKey, temperature: 0 });
   const host = new Host(HOST, PORT);
 
   logAgent('Uploading code to agent...');
@@ -280,8 +284,7 @@ async function runAsyncTask() {
               `${kleur.bold().underline('Tool Input')}:\n${indentString(
                 JSON.stringify(action.toolInput, null, 2),
                 2
-              )}\n\n` +
-              `${kleur.bold().underline('Log')}:\n${indentString(action.log)}`,
+              )}\n`,
             2
           )
       );
@@ -290,7 +293,10 @@ async function runAsyncTask() {
     return session.getResult();
   });
 
-  await writeFile(path.resolve(outfile), formatAgentResult(result));
+  await writeFile(
+    path.resolve(outfile),
+    formatAgentResult(taskDescription, result)
+  );
   logAgent(kleur.green().bold('Complete! ') + formatAgentResultOutput(result));
   logAgent(`${kleur.green().bold('Output written to: ')}${outfile} ✅`);
   sendComplete();
@@ -307,6 +313,7 @@ async function runAsyncTask() {
     await applyAgentResult(result, folder);
   }
 
+  const agentOptions = { model: options.model, clarify: options.clarify };
   const { feedback } = analyticsDisabled
     ? { feedback: 'skip' }
     : await prompts.prompt({
@@ -322,7 +329,7 @@ async function runAsyncTask() {
       });
 
   if (feedback === 'positive') {
-    sendAgentResultFeedback('positive');
+    sendAgentResultFeedback('positive', agentOptions);
   }
   if (feedback === 'negative') {
     const { details } = await prompts.prompt({
@@ -335,7 +342,12 @@ async function runAsyncTask() {
       name: 'email',
       message: 'What email can we contact you at?',
     });
-    sendAgentResultFeedback('negative', details as string, email as string);
+    sendAgentResultFeedback(
+      'negative',
+      agentOptions,
+      details as string,
+      email as string
+    );
   }
 }
 

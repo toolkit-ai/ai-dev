@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 
-import type { BaseLLM } from 'langchain/llms/base';
+import type { ChatOpenAI } from 'langchain/chat_models/openai';
 import WebSocket from 'ws';
 
 import type { HostMessage } from './HostMessage';
@@ -13,11 +13,12 @@ import type {
   AgentUpdateTaskMessage,
 } from '../agent/AgentMessage';
 import type { AgentResult } from '../agent/AgentResult';
+import { mapStoredMessageToChatMessage } from '../util/mapStoredMessageToChatMessage';
 
 export class HostTask extends EventEmitter {
   socket: WebSocket;
 
-  model: BaseLLM;
+  model: ChatOpenAI;
 
   handleAskHuman: (question: string) => Promise<string>;
 
@@ -25,7 +26,7 @@ export class HostTask extends EventEmitter {
     url: string,
     repoName: string,
     taskDescription: string,
-    model: BaseLLM,
+    model: ChatOpenAI,
     handleAskHuman: (question: string) => Promise<string>,
     clarify: boolean = false
   ) {
@@ -83,13 +84,20 @@ export class HostTask extends EventEmitter {
     switch (message.request.type) {
       case 'model': {
         const result = await this.model._generate(
-          message.request.prompts,
+          message.request.messages.map(mapStoredMessageToChatMessage),
           message.request.options
         );
+        const { generations, ...otherResults } = result;
         this.sendMessage({
           type: 'response',
           requestId: message.requestId,
-          response: result,
+          response: {
+            generations: generations.map((generation) => ({
+              ...generation,
+              message: generation.message.toJSON(),
+            })),
+            ...otherResults,
+          },
         });
         break;
       }
