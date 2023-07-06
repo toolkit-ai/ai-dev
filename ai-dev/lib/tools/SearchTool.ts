@@ -20,7 +20,7 @@ class SearchTool extends AgentStructuredTool<typeof SearchSchema> {
   name = 'SearchTool';
 
   description =
-    'A tool that searches for a string in all files within a directory';
+    'A tool that searches for a string in file names or contents within a directory';
 
   schema = SearchSchema;
 
@@ -34,7 +34,7 @@ class SearchTool extends AgentStructuredTool<typeof SearchSchema> {
       result = await files.reduce<Promise<string>>(async (accPromise, file) => {
         let acc = await accPromise;
         const match = await this.fileContainsString(file, searchString);
-        if (match) {
+        if (match || file.includes(searchString)) {
           acc += `${file}\n`;
         }
         return acc;
