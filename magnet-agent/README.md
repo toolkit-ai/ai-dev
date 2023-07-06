@@ -8,7 +8,7 @@ It’s like your very own dedicated engineer:
 - **Portable**. We're making container APIs for local and cloud environments.
 - **Extensible**. You can add your own tasks by writing plugins with LangChain.
 
-Exameples of open-ended tasks you can run with Magnet Agent:
+Examples of open-ended tasks you can run with Magnet Agent:
 
 - “Update my README.md to describe how X feature works”
 - “Find and fix TODO comments in my codebase”
