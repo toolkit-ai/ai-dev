@@ -64,10 +64,11 @@ export function sendError(error: any) {
 
 export function sendAgentResultFeedback(
   feedback: AgentResultFeedback,
+  options: { model: string; clarify: boolean },
   details: any | null = null,
   email: string | null = null
 ) {
-  sendEvent('agent_result_feedback', { feedback, details, email });
+  sendEvent('agent_result_feedback', { feedback, details, email, ...options });
 }
 
 export async function shutdownAsync() {

@@ -72,6 +72,17 @@ export async function containerExists() {
   }
 }
 
+export async function isContainerRunning() {
+  try {
+    const { stdout } = await exec(
+      `docker inspect -f {{.State.Running}} ${CONTAINER_NAME}`
+    );
+    return stdout === 'true';
+  } catch (e) {
+    return false;
+  }
+}
+
 export async function createContainer(port: number) {
   await exec(
     `docker run -d -p ${port}:${port} --name ${CONTAINER_NAME} ${IMAGE_NAME}`

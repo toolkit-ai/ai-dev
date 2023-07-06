@@ -1,14 +1,14 @@
 import { readFile, readdir } from 'fs/promises';
 import path from 'path';
 
-import type { BaseLLM } from 'langchain/llms/base';
+import type { BaseChatModel } from 'langchain/chat_models/base';
 import { StructuredOutputParser } from 'langchain/output_parsers';
 import { PromptTemplate } from 'langchain/prompts';
 import { z } from 'zod';
 
 export async function createTaskClarifyingQuestions(
   taskDescription: string,
-  model: BaseLLM
+  model: BaseChatModel
 ): Promise<string[]> {
   const parser = StructuredOutputParser.fromZodSchema(
     z.object({
@@ -31,7 +31,7 @@ export async function createTaskClarifyingQuestions(
     task_description: taskDescription,
   });
 
-  const response = await model.call(input);
+  const response = await model.predict(input);
   const { questions } = await parser.parse(response);
   return questions;
 }
@@ -39,7 +39,7 @@ export async function createTaskClarifyingQuestions(
 export async function createClarifiedTask(
   taskDescription: string,
   clarifications: [string, string][],
-  model: BaseLLM
+  model: BaseChatModel
 ): Promise<string> {
   const clarificationsString = clarifications.reduce(
     (acc, [question, answer]) => `${acc}Q: ${question}\nA: ${answer}\n\n`,
@@ -57,7 +57,7 @@ export async function createClarifiedTask(
     clarifications: clarificationsString,
   });
 
-  const response = await model.call(input);
+  const response = await model.predict(input);
   return response;
 }
 
@@ -84,7 +84,7 @@ export async function createTaskAgentInput(
   const formatInstructions = parser.getFormatInstructions();
   const prompt = new PromptTemplate({
     template:
-      "You're an expert engineer. The codebase you're working with is located in the {workspace_dir} directory. I'm the product manager and need you to implement this task: '{task_description}'. Here's the first 10 files in the directory: {files}. Explore the codebase and complete the task. If the task is unclear, you can ask me via AskHumanTool. {readme} \n{format_instructions}",
+      "You're an expert engineer. The codebase you're working with is located in the {workspace_dir} directory. I'm the product manager and need you to implement this task: '{task_description}'. Here's the first 10 files in the directory: {files}. Explore the codebase and complete the task. You can interact with the codebase via tools. If the task is unclear, you can ask me via AskHumanTool. {readme} \n{format_instructions}",
     inputVariables: ['task_description', 'workspace_dir', 'files', 'readme'],
     partialVariables: { format_instructions: formatInstructions },
   });

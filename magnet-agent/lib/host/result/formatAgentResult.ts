@@ -2,12 +2,11 @@ import indentString from 'indent-string';
 
 import type { AgentResult } from '../../agent/AgentResult';
 
-export function formatAgentResult(result: AgentResult): string {
+export function formatAgentResult(
+  taskDescription: string,
+  result: AgentResult
+): string {
   const { chain } = result;
-  const task =
-    chain.intermediateSteps[0]?.action?.log?.split('\n')[0]?.substring(10) ||
-    'Unknown Task';
-
   const steps = chain.intermediateSteps
     .map(
       (step, index) => `### Step ${index + 1}: ${step.action.tool}
@@ -23,7 +22,7 @@ export function formatAgentResult(result: AgentResult): string {
     )
     .join('\n\n\n');
 
-  return `# Task: ${task}
+  return `# Task: ${taskDescription}
   
   ${steps}
   

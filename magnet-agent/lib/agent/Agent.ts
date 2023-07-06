@@ -6,9 +6,9 @@ import { CallbackManager } from 'langchain/callbacks';
 import { v4 as uuid } from 'uuid';
 
 import { AgentCallbackHandler } from './AgentCallbackHandler';
+import { AgentChatProxyModel } from './AgentChatProxyModel';
 import type { AgentContext } from './AgentContext';
 import type { AgentMessage } from './AgentMessage';
-import { AgentModel } from './AgentModel';
 import type { AgentRepos } from './AgentRepos';
 import type {
   AgentRequest,
@@ -84,7 +84,7 @@ export class Agent {
       sendRequest: (request) => this.sendRequest(request),
     };
     const tools = this.tools.map((tool) => new (tool as any)(context));
-    const model = new AgentModel({ context });
+    const model = new AgentChatProxyModel({ context });
 
     let taskDescription = initialTaskDescription;
     if (clarify) {
@@ -116,7 +116,7 @@ export class Agent {
 
     const [executor, input] = await Promise.all([
       initializeAgentExecutorWithOptions(tools, model, {
-        agentType: 'structured-chat-zero-shot-react-description',
+        agentType: 'openai-functions',
         returnIntermediateSteps: true,
         verbose: true,
       }),

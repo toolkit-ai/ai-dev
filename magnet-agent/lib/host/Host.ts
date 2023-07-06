@@ -1,6 +1,6 @@
 import axios from 'axios';
 import FormData from 'form-data';
-import type { BaseLLM } from 'langchain/llms/base';
+import type { ChatOpenAI } from 'langchain/chat_models/openai';
 
 import { HostTask } from './HostTask';
 import { createDirectorySource } from './createDirectorySource';
@@ -30,7 +30,7 @@ export class Host {
   startTask(
     repoName: string,
     taskDescription: string,
-    model: BaseLLM,
+    model: ChatOpenAI,
     handleAskHuman: (question: string) => Promise<string>,
     clarify: boolean = false
   ): HostTask {

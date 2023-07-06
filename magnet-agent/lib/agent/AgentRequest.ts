@@ -1,11 +1,15 @@
-import type { LLMResult } from 'langchain/schema';
+import type { Generation, StoredMessage } from 'langchain/schema';
 
-import type { AgentModel } from './AgentModel';
+import type { AgentChatProxyModel } from './AgentChatProxyModel';
+
+type StoredChatGeneration = Generation & {
+  message: StoredMessage;
+};
 
 export type AgentModelRequest = {
   type: 'model';
-  prompts: string[];
-  options: AgentModel['ParsedCallOptions'];
+  messages: StoredMessage[];
+  options: AgentChatProxyModel['ParsedCallOptions'];
 };
 
 export type AgentAskHumanRequest = {
@@ -15,7 +19,10 @@ export type AgentAskHumanRequest = {
 
 export type AgentRequest = AgentModelRequest | AgentAskHumanRequest;
 
-export type AgentRequestModelResponse = LLMResult;
+export type AgentRequestModelResponse = {
+  generations: StoredChatGeneration[];
+  llmOutput?: Record<string, any>;
+};
 
 export type AgentRequestAskHumanResponse = string;
 
