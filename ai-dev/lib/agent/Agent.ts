@@ -120,6 +120,7 @@ export class Agent {
         agentType: 'openai-functions',
         returnIntermediateSteps: true,
         verbose: true,
+        maxIterations: 40,
       }),
       createTaskAgentInput(workspaceDir, taskDescription),
     ]);

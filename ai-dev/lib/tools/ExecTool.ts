@@ -1,11 +1,8 @@
-import { exec as execCallback } from 'child_process';
-import { promisify } from 'util';
+import { exec } from 'child_process';
 
 import { z } from 'zod';
 
 import { AgentStructuredTool } from '../agent/AgentStructuredTool';
-
-const exec = promisify(execCallback);
 
 // Define the Zod schema for the input
 const ExecSchema = z.object({
@@ -25,17 +22,26 @@ class ExecTool extends AgentStructuredTool<typeof ExecSchema> {
   schema = ExecSchema;
 
   // Implement the protected abstract method
-  protected async _call(arg: ExecType): Promise<string> {
+  protected _call(arg: ExecType): Promise<string> {
     const { command, cwd } = arg;
 
-    try {
-      const { stdout } = await exec(command, {
-        cwd: cwd || this.context.workspaceDir,
-      });
-      return stdout;
-    } catch (error) {
-      return `Error running command: "${(error as Error).message}".`;
-    }
+    return new Promise((resolve) => {
+      exec(
+        command,
+        {
+          cwd: cwd || this.context.workspaceDir,
+        },
+        (error, stdout, stderr) => {
+          if (error) {
+            resolve(
+              `non-zero status code:${error.code}\nstdout: ${stdout}\nstderr: ${stderr}`
+            );
+          } else {
+            resolve(`stdout: ${stdout}\nstderr: ${stderr}`);
+          }
+        }
+      );
+    });
   }
 }
 
