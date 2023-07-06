@@ -295,6 +295,18 @@ async function runAsyncTask() {
   logAgent(`${kleur.green().bold('Output written to: ')}${outfile} ✅`);
   sendComplete();
 
+  const { apply } = await prompts.prompt({
+    type: 'toggle',
+    name: 'apply',
+    message: 'Apply the changes to local copy?',
+    initial: false,
+    active: 'yes',
+    inactive: 'no',
+  });
+  if (apply) {
+    await applyAgentResult(result, folder);
+  }
+
   const { feedback } = analyticsDisabled
     ? { feedback: 'skip' }
     : await prompts.prompt({
@@ -312,21 +324,6 @@ async function runAsyncTask() {
   if (feedback === 'positive') {
     sendAgentResultFeedback('positive');
   }
-
-  if (feedback === 'skip' || feedback === 'positive') {
-    const { apply } = await prompts.prompt({
-      type: 'toggle',
-      name: 'apply',
-      message: 'Apply the changes to local copy?',
-      initial: false,
-      active: 'yes',
-      inactive: 'no',
-    });
-    if (apply) {
-      await applyAgentResult(result, folder);
-    }
-  }
-
   if (feedback === 'negative') {
     const { details } = await prompts.prompt({
       type: 'text',
