@@ -42,8 +42,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "prepublish": "pnpm run build",
-    "build": "pnpm clean && pnpm run write-version && tsc --project tsconfig.json && node ./scripts/add-import-stubs.js",
-    "write-version": "node ./scripts/write-version.js && git add ./lib/version.ts",
+    "build": "pnpm clean && tsc --project tsconfig.json && node ./scripts/add-import-stubs.js",
+    "version": "node ./scripts/write-version.js && git add ./lib/version.ts",
     "start-agent-server": "node ./dist/defaultAgentServer.js"
   },
   "dependencies": {
