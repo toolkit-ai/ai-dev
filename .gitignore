@@ -3,3 +3,7 @@ node_modules
 dist
 .DS_Store
 lerna-debug.log
+magnet-agent/agent.js
+magnet-agent/agent.d.ts
+magnet-agent/containers/local.js
+magnet-agent/containers/local.d.ts

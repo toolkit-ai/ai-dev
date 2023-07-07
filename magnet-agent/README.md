@@ -6,7 +6,7 @@ It’s like your very own dedicated engineer:
 
 - **Isolated**. It spins up a Docker sandbox for coding tasks so it's isolated from your local environment.
 - **Portable**. We're making container APIs for local and cloud environments.
-- **Extensible**. You can add your own tasks by writing plugins with LangChain.
+- **Extensible**. You can give the agent your own tools with LangChain.
 
 Examples of open-ended tasks you can run with Magnet Agent:
 

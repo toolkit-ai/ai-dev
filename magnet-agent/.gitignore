@@ -1,8 +1,0 @@
-.env
-node_modules
-dist
-.DS_Store
-agent.js
-agent.d.ts
-containers/local.js
-containers/local.d.ts
