@@ -41,8 +41,9 @@
     "clean": "rm -rf dist && node ./scripts/clean-import-stubs.js",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "prepublish": "pnpm run build",
-    "build": "pnpm clean && tsc --project tsconfig.json && node ./scripts/add-import-stubs.js",
+    "prepublish": "pnpm run clean && pnpm run build:tsc",
+    "build": "pnpm run clean && pnpm run version && pnpm run build:tsc",
+    "build:tsc": "tsc --project tsconfig.json && node ./scripts/add-import-stubs.js",
     "version": "node ./scripts/write-version.js && git add ./lib/version.ts",
     "start-agent-server": "node ./dist/defaultAgentServer.js"
   },
