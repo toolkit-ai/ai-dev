@@ -8,7 +8,7 @@ import { Command } from 'commander';
 import indentString from 'indent-string';
 import kleur from 'kleur';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
-import prompts from 'prompts';
+import prompts, { type PromptObject } from 'prompts';
 import { z } from 'zod';
 
 import {
@@ -63,6 +63,53 @@ program
   .option('-c, --clarify', 'Clarify the task description before running')
   .option('-a, --apply', 'Apply the task description before running');
 
+const promptsConfig: PromptObject<any>[] = [
+  {
+    type: 'text',
+    name: 'folder',
+    initial: process.cwd(),
+    message: 'Specify the folder/repository with the code to edit:',
+    validate: (value: string) => (value ? true : 'This field is required'),
+  },
+  {
+    type: 'text',
+    name: 'taskDescription',
+    message: 'Specify the coding task:',
+    validate: (value: string) => (value ? true : 'This field is required'),
+  },
+  {
+    type: 'text',
+    name: 'outfile',
+    message: "Specify a file to output the agent's results in:",
+    initial: 'results.md',
+    validate: (value: string) => (value ? true : 'This field is required'),
+  },
+  {
+    type: 'select',
+    name: 'model',
+    message: 'Specify the OpenAI model to use:',
+    initial: 1,
+    choices: [
+      { title: 'GPT-3.5 Turbo', value: 'gpt-3.5-turbo-0613' },
+      { title: 'GPT-4 (Recommended)', value: 'gpt-4-0613' },
+    ],
+  },
+  {
+    type: 'toggle',
+    name: 'clarify',
+    message: 'Clarify the task description before starting?',
+    initial: false,
+    active: 'yes',
+    inactive: 'no',
+  },
+  {
+    type: 'password',
+    name: 'openAIApiKey',
+    message: "Paste your OpenAI API key (we'll save this in ~/.magnetrc.json):",
+    validate: (value: string) => (value ? true : 'This field is required'),
+  },
+];
+
 const optionSchema = z.object({
   folder: z.string(),
   outfile: z.string(),
@@ -78,19 +125,41 @@ const settingsSchema = z.object({
   openAIApiKey: z.string(),
 });
 
-function logContainer(message: string) {
-  console.log(`${kleur.inverse().bold('Container')} ${message}`);
+interface Logger {
+  log(message: string): void;
+}
+class BufferedLogger implements Logger {
+  buffer: string[] = [];
+
+  visible: boolean = false;
+
+  show() {
+    this.visible = true;
+    this.buffer.forEach((message) => console.log(message));
+    this.buffer = [];
+  }
+
+  log(message: string) {
+    if (this.visible) {
+      console.log(message);
+      return;
+    }
+    this.buffer.push(message);
+  }
 }
 
-function logAgent(message: string) {
-  console.log(`${kleur.blue().inverse().bold('Agent')} ${message}`);
+function logContainer(message: string, logger: Logger = console) {
+  logger.log(`${kleur.inverse().bold('Container')} ${message}`);
 }
 
-function logError(message: any) {
+function logAgent(message: string, logger: Logger = console) {
+  logger.log(`${kleur.blue().inverse().bold('Agent')} ${message}`);
+}
+
+function logError(message: any, logger: Logger = console) {
   const messageString =
     message instanceof Error ? message.message : String(message);
-
-  console.log(`${kleur.red().inverse().bold('Error')} ${messageString}`);
+  logger.log(`${kleur.red().inverse().bold('Error')} ${messageString}`);
 }
 
 async function writeSettings(settings: z.infer<typeof settingsSchema>) {
@@ -108,109 +177,13 @@ async function readSettings(): Promise<z.infer<typeof settingsSchema> | null> {
   }
 }
 
-async function handleAskHuman(question: string): Promise<string> {
-  const { askHuman } = await prompts.prompt({
-    type: 'text',
-    name: 'askHuman',
-    message: question,
-  });
-  return askHuman;
-}
-
-async function runAsyncTask() {
-  const externalOptions = program.parse(process.argv).opts();
-  const settings = await readSettings();
-
-  prompts.override({
-    folder: externalOptions['folder'],
-    taskDescription: externalOptions['taskfile']
-      ? await readFile(path.resolve(externalOptions['taskfile']), 'utf-8')
-      : externalOptions['task'],
-    outfile: externalOptions['outfile'],
-    model: externalOptions['model'],
-    clarify: externalOptions['clarify'],
-    openAIApiKey: process.env['OPENAI_API_KEY'] || settings?.openAIApiKey,
-  });
-
-  const options = await prompts([
-    {
-      type: 'text',
-      name: 'folder',
-      initial: process.cwd(),
-      message: 'Specify the folder/repository with the code to edit:',
-      validate: (value: string) => (value ? true : 'This field is required'),
-    },
-    {
-      type: 'text',
-      name: 'taskDescription',
-      message: 'Specify the coding task:',
-      validate: (value: string) => (value ? true : 'This field is required'),
-    },
-    {
-      type: 'text',
-      name: 'outfile',
-      message: "Specify a file to output the agent's results in:",
-      initial: 'results.md',
-      validate: (value: string) => (value ? true : 'This field is required'),
-    },
-    {
-      type: 'select',
-      name: 'model',
-      message: 'Specify the OpenAI model to use:',
-      initial: 1,
-      choices: [
-        { title: 'GPT-3.5 Turbo', value: 'gpt-3.5-turbo-0613' },
-        { title: 'GPT-4 (Recommended)', value: 'gpt-4-0613' },
-      ],
-    },
-    {
-      type: 'toggle',
-      name: 'clarify',
-      message: 'Clarify the task description before starting?',
-      initial: false,
-      active: 'yes',
-      inactive: 'no',
-    },
-    {
-      type: 'password',
-      name: 'openAIApiKey',
-      message:
-        "Paste your OpenAI API key (we'll save this in ~/.magnetrc.json):",
-      validate: (value: string) => (value ? true : 'This field is required'),
-    },
-  ]);
-
-  optionSchema.parse(options);
-
-  if (
-    !process.env['OPENAI_API_KEY'] &&
-    settings?.openAIApiKey !== options.openAIApiKey
-  ) {
-    await writeSettings({ openAIApiKey: options.openAIApiKey });
-  }
-
-  const { rebuild } = externalOptions;
-  const {
-    folder,
-    outfile,
-    taskDescription,
-    clarify,
-    model: modelName,
-    openAIApiKey,
-  } = options;
-
-  if (!(await isDockerDesktopInstalled())) {
-    sendDockerDesktopNotInstalled();
-    console.error(
-      'Docker Desktop is not installed. Please visit https://www.docker.com/products/docker-desktop to install it.'
-    );
-    await shutdownAsync();
-    process.exit(1);
-  }
-
+async function setupContainer(logger: Logger, rebuild: boolean) {
   await measureAndSendPerformance('docker-desktop-setup', async () => {
     if (!(await isDockerDesktopRunning())) {
-      logContainer('Docker Desktop is not running, launching it now...');
+      logContainer(
+        'Docker Desktop is not running, launching it now...',
+        logger
+      );
       await launchDockerDesktop();
       await waitForDockerDesktop();
     }
@@ -220,9 +193,12 @@ async function runAsyncTask() {
     'image-setup',
     async () => {
       if (!(await imageExists()) || rebuild) {
-        logContainer('Creating image! This may take a while the first time...');
+        logContainer(
+          'Creating image! This may take a while the first time...',
+          logger
+        );
         if (await containerExists()) {
-          logContainer('Deleting existing container...');
+          logContainer('Deleting existing container...', logger);
           await deleteContainer();
         }
         await createImage(path.join(__dirname, '..'), 'Dockerfile');
@@ -240,20 +216,82 @@ async function runAsyncTask() {
       ]);
       if (!(hasContainer && isRunning) || rebuild) {
         if (hasContainer) {
-          logContainer('Deleting existing container...');
+          logContainer('Deleting existing container...', logger);
           await deleteContainer();
         }
 
-        logContainer('Creating container...');
+        logContainer('Creating container...', logger);
         await createContainer(PORT);
       }
 
-      logContainer('Waiting for container...');
+      logContainer('Waiting for container...', logger);
       await waitForServer(PORT);
-      logContainer(kleur.green('Container ready! ✅'));
+      logContainer(kleur.green('Container ready! ✅'), logger);
     },
     { rebuild }
   );
+}
+
+async function handleAskHuman(question: string): Promise<string> {
+  const { askHuman } = await prompts.prompt({
+    type: 'text',
+    name: 'askHuman',
+    message: question,
+  });
+  return askHuman;
+}
+
+async function runAsyncTask() {
+  const externalOptions = program.parse(process.argv).opts();
+  const settings = await readSettings();
+  const logger = new BufferedLogger();
+
+  if (!(await isDockerDesktopInstalled())) {
+    sendDockerDesktopNotInstalled();
+    console.error(
+      'Docker Desktop is not installed. Please visit https://www.docker.com/products/docker-desktop to install it.'
+    );
+    await shutdownAsync();
+    process.exit(1);
+  }
+
+  prompts.override({
+    folder: externalOptions['folder'],
+    taskDescription: externalOptions['taskfile']
+      ? await readFile(path.resolve(externalOptions['taskfile']), 'utf-8')
+      : externalOptions['task'],
+    outfile: externalOptions['outfile'],
+    model: externalOptions['model'],
+    clarify: externalOptions['clarify'],
+    openAIApiKey: process.env['OPENAI_API_KEY'] || settings?.openAIApiKey,
+  });
+
+  const [options] = await Promise.all([
+    (async () => {
+      const optionsInternal = await prompts(promptsConfig);
+      logger.show();
+      return optionsInternal;
+    })(),
+    setupContainer(logger, externalOptions['rebuild']),
+  ]);
+
+  optionSchema.parse(options);
+
+  if (
+    !process.env['OPENAI_API_KEY'] &&
+    settings?.openAIApiKey !== options['openAIApiKey']
+  ) {
+    await writeSettings({ openAIApiKey: options['openAIApiKey'] });
+  }
+
+  const {
+    folder,
+    outfile,
+    taskDescription,
+    clarify,
+    model: modelName,
+    openAIApiKey,
+  } = options;
 
   const model = new ChatOpenAI({ modelName, openAIApiKey, temperature: 0 });
   const host = new Host(HOST, PORT);
@@ -319,7 +357,7 @@ async function runAsyncTask() {
     await applyAgentResult(result, folder);
   }
 
-  const agentOptions = { model: options.model, clarify: options.clarify };
+  const agentOptions = { model: options['model'], clarify: options['clarify'] };
   const { feedback } = analyticsDisabled
     ? { feedback: 'skip' }
     : await prompts.prompt({

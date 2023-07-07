@@ -28,12 +28,25 @@ export class AgentRepos {
 
     const workspaceDir = await fs.mkdtemp('/tmp/agent-');
     await decompress(repoPath, workspaceDir);
-    await exec('git init && git add .', { cwd: workspaceDir });
+    await exec(
+      `
+        git init &&
+        git config --global init.defaultBranch main &&
+        git config --global user.email magnet-agent-no-reply@toolkit.ai &&
+        git config --global user.name "Magnet Agent" &&
+        git add . && 
+        git commit -m "Initial commit"
+      `,
+      {
+        cwd: workspaceDir,
+      }
+    );
     return workspaceDir;
   }
 
   async getWorkspaceDiff(workspaceDir: string) {
-    const { stdout } = await exec('git diff', { cwd: workspaceDir });
+    await exec('git add .', { cwd: workspaceDir });
+    const { stdout } = await exec('git diff --staged', { cwd: workspaceDir });
     return stdout;
   }
 }

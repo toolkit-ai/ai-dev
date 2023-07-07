@@ -45,6 +45,14 @@ export class HostTask extends EventEmitter {
     this.socket.on('message', (message: string) => {
       this.handleMessage(JSON.parse(message));
     });
+    this.socket.on('error', (error) => {
+      this.emit('error', error);
+    });
+    this.socket.on('close', (code) => {
+      if (code !== 1000) {
+        this.emit('error', new Error(`The agent server crashed.`));
+      }
+    });
   }
 
   async getResult(): Promise<AgentResult> {
