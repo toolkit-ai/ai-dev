@@ -1,4 +1,4 @@
-** ⚠️ Magnet Agent has been rebranded to [AI Dev](https://www.npmjs.com/package/ai-dev). ⚠️ **
+**⚠️ Magnet Agent has been rebranded to [AI Dev](https://www.npmjs.com/package/ai-dev). This package will no longer be updated! ⚠️**
 
 # Magnet Agent
 
