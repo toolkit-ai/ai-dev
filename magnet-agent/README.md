@@ -1,3 +1,5 @@
+** ⚠️ Magnet Agent has been rebranded to [AI Dev](https://www.npmjs.com/package/ai-dev). ⚠️ **
+
 # Magnet Agent
 
 **Magnet Agent is an AI coding assistant that uses tools to perform open-ended tasks on your codebase.**
