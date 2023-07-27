@@ -20,7 +20,7 @@ const client = analyticsDisabled
       host: 'https://app.posthog.com',
     });
 
-function sendEvent(event: string, properties: any) {
+function sendEvent(event: string, properties: Record<string, any> = {}) {
   client.capture({
     distinctId,
     event,
@@ -60,6 +60,14 @@ export function sendError(error: any) {
   sendEvent('error', {
     error: error instanceof Error ? error.message : String(error),
   });
+}
+
+export function sendReviewAgentResult(option: string) {
+  sendEvent('review_agent_result', { option });
+}
+
+export function sendApplyAgentResult() {
+  sendEvent('apply_agent_result');
 }
 
 export function sendAgentResultFeedback(

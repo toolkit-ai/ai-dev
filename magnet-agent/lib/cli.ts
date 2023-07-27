@@ -36,10 +36,13 @@ import {
   measureAndSendPerformance,
   sendComplete,
   sendInterrupt,
+  sendReviewAgentResult,
+  sendApplyAgentResult,
 } from './host/HostTelemetry';
 import { applyAgentResult } from './host/result/applyAgentResult';
 import { formatAgentResult } from './host/result/formatAgentResult';
 import { formatAgentResultOutput } from './host/result/formatAgentResultOutput';
+import { openFile } from './util/openFile';
 import { version } from './version';
 
 const program = new Command();
@@ -50,8 +53,8 @@ program
     'Specify the folder/repository with the code to edit'
   )
   .option(
-    '-o, --outfile <outfile>',
-    "Specify a file to output the agent's results in"
+    '-o, --outfolder <outfolder>',
+    "Specify a folder to output the agent's patch and results in"
   )
   .option('-t, --task <task>', 'Specify the coding task')
   .option(
@@ -79,9 +82,9 @@ const promptsConfig: PromptObject<any>[] = [
   },
   {
     type: 'text',
-    name: 'outfile',
-    message: "Specify a file to output the agent's results in:",
-    initial: 'results.md',
+    name: 'outfolder',
+    message: "Specify the folder to output the agent's results and patch in:",
+    initial: process.cwd(),
     validate: (value: string) => (value ? true : 'This field is required'),
   },
   {
@@ -112,7 +115,7 @@ const promptsConfig: PromptObject<any>[] = [
 
 const optionSchema = z.object({
   folder: z.string(),
-  outfile: z.string(),
+  outfolder: z.string(),
   taskDescription: z.string(),
   model: z.string(),
   clarify: z.boolean(),
@@ -260,7 +263,7 @@ async function runAsyncTask() {
     taskDescription: externalOptions['taskfile']
       ? await readFile(path.resolve(externalOptions['taskfile']), 'utf-8')
       : externalOptions['task'],
-    outfile: externalOptions['outfile'],
+    outfolder: externalOptions['outfolder'],
     model: externalOptions['model'],
     clarify: externalOptions['clarify'],
     openAIApiKey: process.env['OPENAI_API_KEY'] || settings?.openAIApiKey,
@@ -286,7 +289,7 @@ async function runAsyncTask() {
 
   const {
     folder,
-    outfile,
+    outfolder,
     taskDescription,
     clarify,
     model: modelName,
@@ -338,12 +341,49 @@ async function runAsyncTask() {
   });
 
   await writeFile(
-    path.resolve(outfile),
+    path.resolve(outfolder, 'results.md'),
     formatAgentResult(taskDescription, result)
   );
+  await writeFile(path.resolve(outfolder, 'patch.diff'), result.diff);
+
   logAgent(kleur.green().bold('Complete! ') + formatAgentResultOutput(result));
-  logAgent(`${kleur.green().bold('Output written to: ')}${outfile} ✅`);
+  logAgent(
+    `${kleur.green().bold('Step-by-step results written to: ')}${path.join(
+      outfolder,
+      'results.md'
+    )} ✅`
+  );
+  logAgent(
+    `${kleur.green().bold('Patch file written to: ')}${path.join(
+      outfolder,
+      'patch.diff'
+    )} ✅`
+  );
   sendComplete();
+
+  const { review } = await prompts.prompt({
+    type: 'select',
+    name: 'review',
+    message: 'Review the changes from the model?',
+    initial: 0,
+    choices: [
+      { title: 'Open step-by-step results', value: 'results' },
+      { title: 'Open patch file', value: 'patch' },
+      { title: 'Skip', value: 'skip' },
+    ],
+  });
+  switch (review) {
+    case 'results':
+      await openFile(path.resolve(outfolder, 'results.md'));
+      sendReviewAgentResult('results');
+      break;
+    case 'patch':
+      await openFile(path.resolve(outfolder, 'patch.diff'));
+      sendReviewAgentResult('results');
+      break;
+    default:
+      break;
+  }
 
   const { apply } = await prompts.prompt({
     type: 'toggle',
@@ -355,6 +395,7 @@ async function runAsyncTask() {
   });
   if (apply) {
     await applyAgentResult(result, folder);
+    sendApplyAgentResult();
   }
 
   const agentOptions = { model: options['model'], clarify: options['clarify'] };

@@ -36,6 +36,10 @@ See [Documentation](https://toolkitai.notion.site/Magnet-Docs-55cd2321039443d695
 
 See [Contributing](https://toolkitai.notion.site/Contributing-d6ff3008d5664da8ba3cd59efe1f5511?pvs=4).
 
+## Telemetry
+
+See [Telemetry](./TELEMETRY.md) for details on how we collect telemetry data, and how to opt out if desired.
+
 ## License
 
 [Apache 2.0](./LICENSE)

@@ -29,6 +29,7 @@
     "containers/local.d.ts",
     "Dockerfile",
     "README.md",
+    "TELEMETRY.md",
     "LICENSE",
     "package.json"
   ],
