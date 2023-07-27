@@ -1,3 +1,3 @@
-export * from './host';
-export * from './tools';
-export * as defaultServerConfig from './defaultAgentServerConfig';
+export * from './host/index.js';
+export * from './tools/index.js';
+export * as defaultServerConfig from './defaultAgentServerConfig.js';

@@ -1,6 +1,6 @@
 import indentString from 'indent-string';
 
-import type { AgentResult } from '../../agent/AgentResult';
+import type { AgentResult } from '../../agent/AgentResult.js';
 
 export function formatAgentResult(
   taskDescription: string,

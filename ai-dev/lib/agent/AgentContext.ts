@@ -1,4 +1,4 @@
-import type { AgentRequest, AgentRequestResponse } from './AgentRequest';
+import type { AgentRequest, AgentRequestResponse } from './AgentRequest.js';
 
 export type AgentContext = {
   workspaceDir: string;

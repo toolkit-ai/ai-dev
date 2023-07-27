@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 
 import { z } from 'zod';
 
-import { AgentStructuredTool } from '../agent/AgentStructuredTool';
+import { AgentStructuredTool } from '../agent/AgentStructuredTool.js';
 
 // Define the Zod schema for the input
 const DirectoryPathSchema = z.object({

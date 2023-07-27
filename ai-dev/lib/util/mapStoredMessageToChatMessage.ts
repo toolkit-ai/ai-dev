@@ -4,28 +4,28 @@
  */
 
 import {
-  AIChatMessage,
-  BaseChatMessage,
-  HumanChatMessage,
-  SystemChatMessage,
   type StoredMessage,
   ChatMessage,
-  FunctionChatMessage,
+  BaseMessage,
+  HumanMessage,
+  AIMessage,
+  SystemMessage,
+  FunctionMessage,
 } from 'langchain/schema';
 
 export function mapStoredMessageToChatMessage(
   message: StoredMessage
-): BaseChatMessage {
+): BaseMessage {
   switch (message.type) {
     case 'human':
-      return new HumanChatMessage(message.data.content);
+      return new HumanMessage(message.data.content);
     case 'ai':
-      return new AIChatMessage(
+      return new AIMessage(
         message.data.content,
         message.data.additional_kwargs
       );
     case 'system':
-      return new SystemChatMessage(message.data.content);
+      return new SystemMessage(message.data.content);
     case 'chat':
       if (message.data?.additional_kwargs?.['role'] === undefined) {
         throw new Error('Role must be defined for chat messages');
@@ -38,7 +38,7 @@ export function mapStoredMessageToChatMessage(
       if (message.data.name === undefined) {
         throw new Error('Function name is undefined');
       }
-      return new FunctionChatMessage(message.data.content, message.data.name);
+      return new FunctionMessage(message.data.content, message.data.name);
     default:
       throw new Error(`Got unexpected type: ${message.type}`);
   }

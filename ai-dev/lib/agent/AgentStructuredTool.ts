@@ -2,10 +2,10 @@ import { CallbackManager, type Callbacks } from 'langchain/callbacks';
 import { StructuredTool } from 'langchain/tools';
 import { z } from 'zod';
 
-import type { AgentContext } from './AgentContext';
+import type { AgentContext } from './AgentContext.js';
 
 export abstract class AgentStructuredTool<
-  T extends z.ZodObject<any, any, any, any> = z.ZodObject<any, any, any, any>
+  T extends z.ZodObject<any, any, any, any> = z.ZodObject<any, any, any, any>,
 > extends StructuredTool<T> {
   context: AgentContext;
 

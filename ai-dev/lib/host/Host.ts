@@ -2,8 +2,8 @@ import axios from 'axios';
 import FormData from 'form-data';
 import type { ChatOpenAI } from 'langchain/chat_models/openai';
 
-import { HostTask } from './HostTask';
-import { createDirectorySource } from './createDirectorySource';
+import { HostTask } from './HostTask.js';
+import { createDirectorySource } from './createDirectorySource.js';
 
 export class Host {
   hostname: string;

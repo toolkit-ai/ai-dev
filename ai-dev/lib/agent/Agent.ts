@@ -5,28 +5,28 @@ import {
 import { CallbackManager } from 'langchain/callbacks';
 import { v4 as uuid } from 'uuid';
 
-import { AgentCallbackHandler } from './AgentCallbackHandler';
-import { AgentChatProxyModel } from './AgentChatProxyModel';
-import type { AgentContext } from './AgentContext';
-import type { AgentMessage } from './AgentMessage';
-import type { AgentRepos } from './AgentRepos';
+import { AgentCallbackHandler } from './AgentCallbackHandler.js';
+import { AgentChatProxyModel } from './AgentChatProxyModel.js';
+import type { AgentContext } from './AgentContext.js';
+import type { AgentMessage } from './AgentMessage.js';
+import type { AgentRepos } from './AgentRepos.js';
 import type {
   AgentRequest,
   AgentRequestResponse,
   AgentAskHumanRequest,
   AgentRequestAskHumanResponse,
-} from './AgentRequest';
-import type { AgentStructuredTool } from './AgentStructuredTool';
+} from './AgentRequest.js';
+import type { AgentStructuredTool } from './AgentStructuredTool.js';
 import {
   createTaskAgentInput,
   createTaskClarifyingQuestions,
   createClarifiedTask,
-} from './AgentTasks';
+} from './AgentTasks.js';
 import type {
   HostMessage,
   HostResponseMessage,
   HostStartMessage,
-} from '../host/HostMessage';
+} from '../host/HostMessage.js';
 
 export class Agent {
   repos: AgentRepos;
@@ -164,7 +164,7 @@ export class Agent {
 
   private sendRequest<
     TRequest extends AgentRequest,
-    TResponse extends AgentRequestResponse
+    TResponse extends AgentRequestResponse,
   >(request: TRequest): Promise<TResponse> {
     const requestId = uuid();
     const promise: Promise<TResponse> = new Promise((resolve, reject) => {

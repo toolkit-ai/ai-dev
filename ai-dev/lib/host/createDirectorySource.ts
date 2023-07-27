@@ -5,7 +5,9 @@ import path from 'path';
 
 import archiver from 'archiver';
 import ignore from 'ignore';
-import { sync as walkSync } from 'walkdir';
+import walkDir from 'walkdir';
+
+const { sync: walkSync } = walkDir;
 
 function findGitignore(currentDir: string): string | null {
   const gitignorePath = path.join(currentDir, '.gitignore');
@@ -30,6 +32,7 @@ export async function createDirectorySource(directoryPath: string) {
   const gitignoreList = gitignorePath
     ? (await fs.readFile(gitignorePath, 'utf8')).split('\n')
     : [];
+  // @ts-expect-error TS2349
   const gitignore = ignore().add([...gitignoreList, '.git']);
   const tmpdir = await fs.mkdtemp(path.join(os.tmpdir(), 'repo-'));
 
