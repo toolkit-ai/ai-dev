@@ -82,6 +82,7 @@ export class Agent {
     const workspaceDir = await this.repos.createWorkspace(repoName);
     const context: AgentContext = {
       sendRequest: (request) => this.sendRequest(request),
+      workspaceDir,
     };
     const tools = this.tools.map((tool) => new (tool as any)(context));
     const model = new AgentChatProxyModel({ context });
@@ -119,6 +120,7 @@ export class Agent {
         agentType: 'openai-functions',
         returnIntermediateSteps: true,
         verbose: true,
+        maxIterations: 40,
       }),
       createTaskAgentInput(workspaceDir, taskDescription),
     ]);

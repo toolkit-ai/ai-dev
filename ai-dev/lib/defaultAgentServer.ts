@@ -8,6 +8,7 @@ import {
   SearchTool,
   FileWriteTool,
   FileDeleteTool,
+  ExecTool,
 } from './tools';
 import AskHumanTool from './tools/AskHumanTool';
 
@@ -19,6 +20,7 @@ const server = createAgentServer({
     FileWriteTool,
     FileDeleteTool,
     AskHumanTool,
+    ExecTool,
   ],
 });
 
