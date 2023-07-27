@@ -1,7 +1,7 @@
 {
-  "name": "magnet-agent",
+  "name": "ai-dev",
   "version": "0.1.30",
-  "description": "AI coding assistant that uses tools to perform tasks on your codebase.",
+  "description": "AI Dev is a coding assistant that uses tools to perform tasks on your codebase.",
   "keywords": [
     "ai",
     "gpt",
@@ -12,7 +12,7 @@
     "assistant"
   ],
   "author": "Toolkit AI <team@toolkit.ai>",
-  "homepage": "https://toolkitai.notion.site/Magnet-Docs-55cd2321039443d695235cadb884cabb?pvs=4",
+  "homepage": "https://toolkitai.notion.site/AI-Dev-55cd2321039443d695235cadb884cabb?pvs=4",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=18"
@@ -34,8 +34,8 @@
     "package.json"
   ],
   "bin": {
-    "magnet-agent": "./dist/cli.js",
-    "magnet-agent-server": "./dist/defaultAgentServer.js"
+    "ai-dev": "./dist/cli.js",
+    "ai-dev-server": "./dist/defaultAgentServer.js"
   },
   "scripts": {
     "format": "prettier --check .",
@@ -46,7 +46,7 @@
     "build": "pnpm run clean && pnpm run version && pnpm run build:tsc",
     "build:tsc": "tsc --project tsconfig.json && node ./scripts/add-import-stubs.js",
     "version": "node ./scripts/write-version.js && git add ./lib/version.ts",
-    "start-agent-server": "node ./dist/defaultAgentServer.js"
+    "start-server": "node ./dist/defaultAgentServer.js"
   },
   "dependencies": {
     "@fastify/multipart": "^7.6.1",
@@ -91,10 +91,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hey-pal/magnet-agent.git"
+    "url": "git+https://github.com/hey-pal/ai-dev.git"
   },
   "bugs": {
-    "url": "https://github.com/hey-pal/magnet-agent/issues"
+    "url": "https://github.com/hey-pal/ai-dev/issues"
   },
   "exports": {
     ".": {

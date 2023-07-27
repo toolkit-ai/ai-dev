@@ -1,8 +1,10 @@
-# Telemetry in Magnet Agent
+# Telemetry in AI Dev
 
-Telemetry is a crucial part of the Magnet Agent. It allows us to understand how the agent is used, identify issues and areas for improvement, and ensure the best possible user experience. The data we collect includes performance metrics, errors, and usage patterns.
+Telemetry is a crucial part of the AI Dev. It allows us to understand how the agent is used, identify issues and areas for improvement, and ensure the best possible user experience. The data we collect includes performance metrics, errors, and usage patterns.
 
-Here's a table of the events that we send with `sendEvent`:
+## Types of Telemetry
+
+Here's a table of common events that we send with `sendEvent`:
 
 | Event                        | Description                                      |
 | ---------------------------- | ------------------------------------------------ |
@@ -20,4 +22,4 @@ Each event contains additional properties that provide more context about the ev
 
 ## Opting Out of Telemetry
 
-If you prefer not to send telemetry data, you can opt out by setting the `MAGNET_AGENT_TELEMETRY` environment variable. Please note that this may limit our ability to improve the agent and provide support.
+If you prefer not to send telemetry data, you can opt out by setting the `AI_DEV_TELEMETRY` environment variable. Please note that this may limit our ability to improve the agent and provide support.

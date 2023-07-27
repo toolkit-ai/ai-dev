@@ -32,8 +32,8 @@ export class AgentRepos {
       `
         git init &&
         git config --global init.defaultBranch main &&
-        git config --global user.email magnet-agent-no-reply@toolkit.ai &&
-        git config --global user.name "Magnet Agent" &&
+        git config --global user.email ai-dev-no-reply@toolkit.ai &&
+        git config --global user.name "AI Dev" &&
         git add . && 
         git commit -m "Initial commit"
       `,

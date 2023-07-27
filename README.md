@@ -1,57 +1,49 @@
-# Magnet Agent
+# AI Dev
 
-Magent Agent is a tool-enabled coding assistant that can perform open-ended tasks on your codebase:
+AI Dev is a tool-enabled coding assistant that can perform open-ended tasks on your codebase:
 
 - **Isolated**. It spins up a Docker sandbox for coding tasks so it's isolated from your local environment.
 - **Portable**. We're making container APIs for local and cloud environments.
 - **Extensible**. You can add your own tasks by writing plugins with LangChain.
-## Install
-
-**The easiest way to try Magnet Agent is to download [Magnet](https://magnet.run), our desktop app that comes with Magnet Agent pre-installed.**
-
-However, you can try Magnet Agent without Magnet with our CLI:
-
-```bash
-npm install magnet-agent
-```
 
 ## Usage
 
-You can run Magnet Agent with our CLI by calling:
+AI Dev is published on npm.
 
 ```bash
-OPENAI_API_KEY=your_openai_api_key_here npx magnet-agent -f ./ -t "Your task here." -o ./output.md
+npm install ai-dev
 ```
 
-Here's what each of the options mean:
-- `-f` is the path to the folder you want to run the task on.
-- `-t` is the task description, alternately you can pass in a task file with `-tf`.
-- `-o` is the path to the file where the agent will output the results.
-- `-m` is the model to use. Defaults to `gpt-3.5-turbo`.
-
-You'll need to have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running on your machine.
+See the [package README](./ai-dev/README.md) for more information.
 
 ## Development
 
-This is a monorepo managed with Lerna. To get started, run:
+This is a monorepo managed with Lerna. For now, there's a single `ai-dev` package that contains the CLI and tools to embed AI Dev in other applications.
+
+Over time, we'll add more packages to this repo demonstrating embedding use-cases.
+
+### Setup
+
+To get started, run:
 
 ```bash
 pnpm install -g lerna
 pnpm install
 ```
 
+### Building
+
 Then, you can build all of the packages using `lerna run build`.
 
-Or, you can build a specific package using `lerna run build --scope package-name`.
+### Running Locally
 
-Once you've built the packages, you can run the CLI by calling:
+To test the CLI, you can link it via pnpm, and then call it using npx:
 
 ```bash
-cd magnet-agent
-OPENAI_API_KEY=your_openai_api_key_here  npx magnet-agent -f ./ --task "Browse and understand the codebase / packaging here, and then based on what you learn, edit the README.md to show how to use npx magnet-agent, documenting all of the different parameters in defined in cmd.ts" -o ./test.md -r -of md -m gpt-4
+cd ai-dev
+pnpm link .
+npx ai-dev
 ```
-
-You can also add a `.env` file in `magnet-agent` with your `OPENAI_API_KEY` if you don't want to pass it in as an environment variable.
 
 ## License
 
