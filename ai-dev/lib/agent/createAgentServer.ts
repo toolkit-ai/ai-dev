@@ -2,9 +2,9 @@ import fastifyMulitpartPlugin from '@fastify/multipart';
 import fastifyWebsocketPlugin from '@fastify/websocket';
 import fastify from 'fastify';
 
-import { Agent } from './Agent';
-import { AgentRepos } from './AgentRepos';
-import type { AgentStructuredTool } from './AgentStructuredTool';
+import { Agent } from './Agent.js';
+import { AgentRepos } from './AgentRepos.js';
+import type { AgentStructuredTool } from './AgentStructuredTool.js';
 
 export type ServerConfig = {
   tools: (typeof AgentStructuredTool<any>)[];

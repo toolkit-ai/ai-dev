@@ -1,10 +1,10 @@
-import AskHumanTool from './AskHumanTool';
-import DirectoryReadTool from './DirectoryReadTool';
-import ExecTool from './ExecTool';
-import FileDeleteTool from './FileDeleteTool';
-import FileReadTool from './FileReadTool';
-import FileWriteTool from './FileWriteTool';
-import SearchTool from './SearchTool';
+import AskHumanTool from './AskHumanTool.js';
+import DirectoryReadTool from './DirectoryReadTool.js';
+import ExecTool from './ExecTool.js';
+import FileDeleteTool from './FileDeleteTool.js';
+import FileReadTool from './FileReadTool.js';
+import FileWriteTool from './FileWriteTool.js';
+import SearchTool from './SearchTool.js';
 
 export {
   AskHumanTool,

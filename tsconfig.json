@@ -6,7 +6,7 @@
   ],
   "compilerOptions": {
     "strict": true,
-    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "declaration": true,
     "declarationMap": true,
     "ignoreDeprecations": "5.0"

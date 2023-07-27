@@ -1,7 +1,7 @@
 import { exec as execCallback } from 'child_process';
 import { promisify } from 'util';
 
-import { version } from '../version';
+import { version } from '../version.js';
 
 const exec = promisify(execCallback);
 

@@ -8,11 +8,11 @@
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@tsconfig/esm": "^1.0.3",
-    "@tsconfig/node18": "^2.0.1",
+    "@tsconfig/esm": "^1.0.4",
+    "@tsconfig/node18": "^18.2.0",
     "@tsconfig/strictest": "^2.0.1",
     "husky": "^8.0.3",
-    "lerna": "^7.0.1"
+    "lerna": "^7.1.4"
   },
   "pnpm": {
     "overrides": {

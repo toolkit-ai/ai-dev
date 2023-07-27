@@ -3,7 +3,7 @@ import EventEmitter from 'events';
 import type { ChatOpenAI } from 'langchain/chat_models/openai';
 import WebSocket from 'ws';
 
-import type { HostMessage } from './HostMessage';
+import type { HostMessage } from './HostMessage.js';
 import type {
   AgentMessage,
   AgentRequestMessage,
@@ -11,9 +11,9 @@ import type {
   AgentCompleteMessage,
   AgentActionMessage,
   AgentUpdateTaskMessage,
-} from '../agent/AgentMessage';
-import type { AgentResult } from '../agent/AgentResult';
-import { mapStoredMessageToChatMessage } from '../util/mapStoredMessageToChatMessage';
+} from '../agent/AgentMessage.js';
+import type { AgentResult } from '../agent/AgentResult.js';
+import { mapStoredMessageToChatMessage } from '../util/mapStoredMessageToChatMessage.js';
 
 export class HostTask extends EventEmitter {
   socket: WebSocket;
@@ -102,7 +102,7 @@ export class HostTask extends EventEmitter {
           response: {
             generations: generations.map((generation) => ({
               ...generation,
-              message: generation.message.toJSON(),
+              message: generation.message.toDict(),
             })),
             ...otherResults,
           },

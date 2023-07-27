@@ -24,9 +24,9 @@ import {
   launchDockerDesktop,
   waitForDockerDesktop,
   waitForServer,
-} from './containers/local';
-import { HOST, PORT } from './defaultAgentServerConfig';
-import { Host } from './host';
+} from './containers/local.js';
+import { HOST, PORT } from './defaultAgentServerConfig.js';
+import { Host } from './host/Host.js';
 import {
   analyticsDisabled,
   sendError,
@@ -39,12 +39,12 @@ import {
   sendInterrupt,
   sendReviewAgentResult,
   sendApplyAgentResult,
-} from './host/HostTelemetry';
-import { applyAgentResult } from './host/result/applyAgentResult';
-import { formatAgentResult } from './host/result/formatAgentResult';
-import { formatAgentResultOutput } from './host/result/formatAgentResultOutput';
-import { openFile } from './util/openFile';
-import { version } from './version';
+} from './host/HostTelemetry.js';
+import { applyAgentResult } from './host/result/applyAgentResult.js';
+import { formatAgentResult } from './host/result/formatAgentResult.js';
+import { formatAgentResultOutput } from './host/result/formatAgentResultOutput.js';
+import { openFile } from './util/openFile.js';
+import { version } from './version.js';
 
 const program = new Command();
 program

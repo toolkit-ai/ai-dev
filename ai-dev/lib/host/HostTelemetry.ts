@@ -1,7 +1,7 @@
 import { PostHog } from 'posthog-node';
 import { v4 as uuidv4 } from 'uuid';
 
-import { version } from '../version';
+import { version } from '../version.js';
 
 type AgentResultFeedback = 'positive' | 'negative';
 

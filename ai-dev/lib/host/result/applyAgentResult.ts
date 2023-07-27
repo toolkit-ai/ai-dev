@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { promisify } from 'util';
 
-import type { AgentResult } from '../../agent';
+import type { AgentResult } from '../../agent/AgentResult.js';
 
 const exec = promisify(execCallback);
 

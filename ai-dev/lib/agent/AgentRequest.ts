@@ -1,6 +1,6 @@
 import type { Generation, StoredMessage } from 'langchain/schema';
 
-import type { AgentChatProxyModel } from './AgentChatProxyModel';
+import type { AgentChatProxyModel } from './AgentChatProxyModel.js';
 
 type StoredChatGeneration = Generation & {
   message: StoredMessage;

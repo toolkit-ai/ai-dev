@@ -1,6 +1,6 @@
 import type { AgentAction, ChainValues } from 'langchain/schema';
 
-import type { AgentRequest } from './AgentRequest';
+import type { AgentRequest } from './AgentRequest.js';
 
 export type AgentRequestMessage = {
   type: 'request';

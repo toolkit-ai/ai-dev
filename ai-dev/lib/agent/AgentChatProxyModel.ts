@@ -6,14 +6,14 @@
 import type { CallbackManagerForLLMRun } from 'langchain/callbacks';
 import { BaseChatModel } from 'langchain/chat_models/base';
 import { type BaseLLMParams } from 'langchain/llms/base';
-import type { BaseChatMessage, ChatResult } from 'langchain/schema';
+import type { BaseMessage, ChatResult } from 'langchain/schema';
 import type { ChatCompletionFunctions } from 'openai';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import type { AgentContext } from './AgentContext';
-import type { AgentRequestModelResponse } from './AgentRequest';
-import type { AgentStructuredTool } from './AgentStructuredTool';
-import { mapStoredMessageToChatMessage } from '../util/mapStoredMessageToChatMessage';
+import type { AgentContext } from './AgentContext.js';
+import type { AgentRequestModelResponse } from './AgentRequest.js';
+import type { AgentStructuredTool } from './AgentStructuredTool.js';
+import { mapStoredMessageToChatMessage } from '../util/mapStoredMessageToChatMessage.js';
 
 function formatToOpenAIFunction(
   tool: AgentStructuredTool
@@ -48,7 +48,7 @@ export class AgentChatProxyModel extends BaseChatModel {
   }
 
   override async _generate(
-    messages: BaseChatMessage[],
+    messages: BaseMessage[],
     options: this['ParsedCallOptions'],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _?: CallbackManagerForLLMRun | undefined
@@ -60,7 +60,7 @@ export class AgentChatProxyModel extends BaseChatModel {
     );
     const result = await this.context.sendRequest<AgentRequestModelResponse>({
       type: 'model',
-      messages: messages.map((m) => m.toJSON()),
+      messages: messages.map((m) => m.toDict()),
       // @ts-expect-error 6133
       options: {
         // OpenAI errors if you pass an empty array of functions

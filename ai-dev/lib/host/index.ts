@@ -1,11 +1,11 @@
-export { Host } from './Host';
+export { Host } from './Host.js';
 
-export { createDirectorySource } from './createDirectorySource';
+export { createDirectorySource } from './createDirectorySource.js';
 
-export { formatAgentResult } from './result/formatAgentResult';
-export { formatAgentResultOutput } from './result/formatAgentResultOutput';
-export { applyAgentResult } from './result/applyAgentResult';
+export { formatAgentResult } from './result/formatAgentResult.js';
+export { formatAgentResultOutput } from './result/formatAgentResultOutput.js';
+export { applyAgentResult } from './result/applyAgentResult.js';
 
-export * from './HostTelemetry';
+export * from './HostTelemetry.js';
 
-export type * from './HostMessage';
+export type * from './HostMessage.js';

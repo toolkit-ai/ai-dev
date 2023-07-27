@@ -4,7 +4,7 @@ import readline from 'readline';
 
 import { z } from 'zod';
 
-import { AgentStructuredTool } from '../agent/AgentStructuredTool';
+import { AgentStructuredTool } from '../agent/AgentStructuredTool.js';
 
 // Define the Zod schema for the input
 const SearchSchema = z.object({

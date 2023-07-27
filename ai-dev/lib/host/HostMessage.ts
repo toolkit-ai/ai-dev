@@ -1,4 +1,4 @@
-import type { AgentRequestResponse } from '../agent/AgentRequest';
+import type { AgentRequestResponse } from '../agent/AgentRequest.js';
 
 export type HostModelResponse = string[];
 

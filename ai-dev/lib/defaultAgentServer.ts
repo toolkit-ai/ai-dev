@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { createAgentServer } from './agent/createAgentServer';
-import { HOST, PORT } from './defaultAgentServerConfig';
+import { createAgentServer } from './agent/createAgentServer.js';
+import { HOST, PORT } from './defaultAgentServerConfig.js';
 import {
   FileReadTool,
   DirectoryReadTool,
@@ -9,8 +9,8 @@ import {
   FileWriteTool,
   FileDeleteTool,
   ExecTool,
-} from './tools';
-import AskHumanTool from './tools/AskHumanTool';
+  AskHumanTool,
+} from './tools/index.js';
 
 const server = createAgentServer({
   tools: [
