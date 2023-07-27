@@ -38,7 +38,7 @@ See [Contributing](https://toolkitai.notion.site/Contributing-d6ff3008d5664da8ba
 
 ## Telemetry
 
-See [Telemetry](./TELEMETRY.md) for details on how we collect telemetry data, and how to opt out if desired.
+See [Telemetry](https://toolkitai.notion.site/CLI-e7368c0447fb4e4ba6c0fbcbcf94879a) for details on how we collect telemetry data, and how to opt out if desired.
 
 ## License
 
