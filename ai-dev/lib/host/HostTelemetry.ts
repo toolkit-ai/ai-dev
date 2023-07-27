@@ -5,7 +5,7 @@ import { version } from '../version';
 
 type AgentResultFeedback = 'positive' | 'negative';
 
-export const analyticsDisabled = process.env['MAGNET_AGENT_TELEMETRY'];
+export const analyticsDisabled = process.env['AI_DEV_TELEMETRY'];
 
 class DisabledPostHog {
   capture() {}

@@ -5,8 +5,9 @@ import { version } from '../version';
 
 const exec = promisify(execCallback);
 
-const IMAGE_NAME = `magnet-agent-${version}`;
-const CONTAINER_NAME = 'magnet-agent';
+const IMAGE_NAME = `ai-dev-${version}`;
+const CONTAINER_NAME = 'ai-dev';
+const OLD_CONTAINER_NAME = 'magnet-agent';
 
 export async function isDockerDesktopInstalled() {
   try {
@@ -87,6 +88,15 @@ export async function createContainer(port: number) {
   await exec(
     `docker run -d -p ${port}:${port} --name ${CONTAINER_NAME} ${IMAGE_NAME}`
   );
+}
+
+export async function deleteOldContainerIfExists() {
+  try {
+    await exec(`docker stop ${OLD_CONTAINER_NAME}`);
+    await exec(`docker rm ${OLD_CONTAINER_NAME}`);
+  } catch (e) {
+    // ignore
+  }
 }
 
 export async function deleteContainer() {

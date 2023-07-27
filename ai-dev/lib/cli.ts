@@ -16,6 +16,7 @@ import {
   createContainer,
   createImage,
   deleteContainer,
+  deleteOldContainerIfExists,
   imageExists,
   isContainerRunning,
   isDockerDesktopInstalled,
@@ -108,7 +109,7 @@ const promptsConfig: PromptObject<any>[] = [
   {
     type: 'password',
     name: 'openAIApiKey',
-    message: "Paste your OpenAI API key (we'll save this in ~/.magnetrc.json):",
+    message: "Paste your OpenAI API key (we'll save this in ~/.aidevrc.json):",
     validate: (value: string) => (value ? true : 'This field is required'),
   },
 ];
@@ -122,7 +123,7 @@ const optionSchema = z.object({
   openAIApiKey: z.string(),
 });
 
-const settingsPath = path.join(os.homedir(), '.magnetrc.json');
+const settingsPath = path.join(os.homedir(), '.aidevrc.json');
 
 const settingsSchema = z.object({
   openAIApiKey: z.string(),
@@ -195,6 +196,8 @@ async function setupContainer(logger: Logger, rebuild: boolean) {
   await measureAndSendPerformance(
     'image-setup',
     async () => {
+      await deleteOldContainerIfExists();
+
       if (!(await imageExists()) || rebuild) {
         logContainer(
           'Creating image! This may take a while the first time...',

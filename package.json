@@ -20,6 +20,6 @@
     }
   },
   "workspaces": [
-    "magnet-agent"
+    "ai-dev"
   ]
 }
