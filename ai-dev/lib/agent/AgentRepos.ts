@@ -30,10 +30,10 @@ export class AgentRepos {
     await decompress(repoPath, workspaceDir);
     await exec(
       `
-        git init &&
         git config --global init.defaultBranch main &&
         git config --global user.email ai-dev-no-reply@toolkit.ai &&
         git config --global user.name "AI Dev" &&
+        git init &&
         git add . && 
         git commit -m "Initial commit"
       `,
