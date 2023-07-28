@@ -3,7 +3,6 @@ import FormData from 'form-data';
 import type { ChatOpenAI } from 'langchain/chat_models/openai';
 
 import { HostTask } from './HostTask.js';
-import { createDirectorySource } from './createDirectorySource.js';
 
 export class Host {
   hostname: string;
@@ -15,10 +14,10 @@ export class Host {
     this.port = port;
   }
 
-  async uploadDirectory(repoName: string, directoryPath: string) {
+  async uploadSource(repoName: string, stream: NodeJS.ReadableStream) {
     const form = new FormData();
     form.append('repoName', repoName);
-    form.append('archive', await createDirectorySource(directoryPath));
+    form.append('archive', stream);
 
     await axios.post(`http://${this.hostname}:${this.port}/upload`, form, {
       headers: {

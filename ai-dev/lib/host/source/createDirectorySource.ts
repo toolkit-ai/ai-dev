@@ -26,7 +26,9 @@ function findGitignore(currentDir: string): string | null {
   return findGitignore(parentDir);
 }
 
-export async function createDirectorySource(directoryPath: string) {
+export async function createDirectorySource(
+  directoryPath: string
+): Promise<NodeJS.ReadableStream> {
   const resolved = path.resolve(directoryPath);
   const gitignorePath = findGitignore(resolved);
   const gitignoreList = gitignorePath

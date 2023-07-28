@@ -3,6 +3,7 @@
 import { readFile, writeFile } from 'fs/promises';
 import os from 'os';
 import path from 'path';
+import url from 'url';
 
 import { Command } from 'commander';
 import indentString from 'indent-string';
@@ -43,15 +44,21 @@ import {
 import { applyAgentResult } from './host/result/applyAgentResult.js';
 import { formatAgentResult } from './host/result/formatAgentResult.js';
 import { formatAgentResultOutput } from './host/result/formatAgentResultOutput.js';
+import { createDirectorySource, createGitHubSource } from './index.js';
 import { openFile } from './util/openFile.js';
 import { version } from './version.js';
+
+// eslint-disable-next-line  @typescript-eslint/naming-convention
+const __filename = url.fileURLToPath(import.meta.url);
+// eslint-disable-next-line  @typescript-eslint/naming-convention
+const __dirname = path.dirname(__filename);
 
 const program = new Command();
 program
   .version(version)
   .option(
     '-f, --folder <repo>',
-    'Specify the folder/repository with the code to edit'
+    'Specify the folder path or public GitHub repo with the code to edit'
   )
   .option(
     '-o, --outfolder <outfolder>',
@@ -72,7 +79,8 @@ const promptsConfig: PromptObject<any>[] = [
     type: 'text',
     name: 'folder',
     initial: process.cwd(),
-    message: 'Specify the folder/repository with the code to edit:',
+    message:
+      'Specify the folder path or public GitHub repo with the code to edit:',
     validate: (value: string) => (value ? true : 'This field is required'),
   },
   {
@@ -304,7 +312,20 @@ async function runAsyncTask() {
 
   logAgent('Uploading code to agent...');
   await measureAndSendPerformance('upload-code', async () => {
-    await host.uploadDirectory(folder, folder);
+    // Check if the folder is a GitHub repo, and parse out owner, repo, and branch (default to main if not present)
+    const githubRegex =
+      /^https:\/\/github.com\/(?<owner>[^/]+)\/(?<repo>[^/]+)(\/tree\/(?<branch>.+))?$/;
+    const githubMatch = folder.match(githubRegex);
+    if (githubMatch) {
+      const { owner, repo, branch = 'main' } = githubMatch.groups;
+      await host.uploadSource(
+        folder,
+        await createGitHubSource(owner, repo, branch)
+      );
+      return;
+    }
+
+    await host.uploadSource(folder, await createDirectorySource(folder));
   });
 
   logAgent('Agent running task...');
