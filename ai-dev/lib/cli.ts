@@ -102,6 +102,7 @@ const promptsConfig: PromptObject<any>[] = [
     message: 'Specify the OpenAI model to use:',
     initial: 1,
     choices: [
+      { title: 'GPT-3.5 Turbo-16k', value: 'gpt-3.5-turbo-16k'},
       { title: 'GPT-3.5 Turbo', value: 'gpt-3.5-turbo-0613' },
       { title: 'GPT-4 (Recommended)', value: 'gpt-4-0613' },
     ],
